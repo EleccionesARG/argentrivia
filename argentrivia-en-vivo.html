@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Argentrivia En Vivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --celeste:#6CB7E8;--celeste-deep:#3F8FC6;--navy:#0E2A47;--paper:#F4F8FC;--white:#fff;
+    --sun:#F6C544;--sun-deep:#E0A91F;--line:#D6E4F0;--muted:#5E7894;
+    --good:#1F9D57;--good-bg:#E4F6EC;--bad:#D33C36;--bad-bg:#FBE7E6;
+    --a1:#E2493B;--a2:#2E6FB7;--a3:#E0A91F;--a4:#2E9E6B;
+    --shadow:0 10px 30px rgba(14,42,71,.14);--shadow-sm:0 3px 12px rgba(14,42,71,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--navy);min-height:100dvh;
+    background:radial-gradient(1200px 520px at 50% -10%,rgba(108,183,232,.35),transparent 60%),var(--paper);
+    -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:820px;margin:0 auto;padding:20px 18px 44px;min-height:100dvh;display:flex;flex-direction:column}
+  .screen{display:none;animation:fade .3s ease both}
+  .screen.active{display:flex;flex-direction:column;flex:1}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .brand{text-align:center;margin:14px 0 8px}
+  .brand h1{font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(40px,11vw,76px);line-height:.92;margin:0;text-transform:uppercase}
+  .brand h1 .ar{color:var(--celeste-deep)} .brand h1 .tri{color:var(--sun-deep)}
+  .kick{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .live{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--bad);letter-spacing:.1em;font-size:13px;text-transform:uppercase}
+  .live .dot{width:9px;height:9px;border-radius:50%;background:var(--bad);animation:pulse 1.3s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .tagline{color:var(--muted);max-width:40ch;margin:6px auto 0;font-size:15px}
+  .btn{appearance:none;border:0;cursor:pointer;font-family:inherit;font-weight:700;border-radius:16px;padding:16px 22px;font-size:17px;width:100%;transition:transform .08s,background .2s,box-shadow .2s}
+  .btn:active{transform:translateY(1px)}
+  .btn:disabled{opacity:.45;cursor:default}
+  .btn-primary{background:var(--navy);color:#fff;box-shadow:var(--shadow-sm)} .btn-primary:hover:not(:disabled){background:#163b61}
+  .btn-sun{background:var(--sun);color:var(--navy);box-shadow:var(--shadow-sm)} .btn-sun:hover:not(:disabled){background:var(--sun-deep)}
+  .btn-ghost{background:transparent;color:var(--navy);border:2px solid var(--line)} .btn-ghost:hover{border-color:var(--celeste-deep);color:var(--celeste-deep)}
+  .stack{display:flex;flex-direction:column;gap:12px;margin-top:auto}
+  .center{margin:auto 0}
+  .row{display:flex;gap:12px} .row .btn{flex:1}
+  .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow-sm)}
+  .section-title{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;font-size:24px;margin:0 0 4px}
+  .hint{color:var(--muted);font-size:14px;margin:0 0 16px}
+  .lbl{display:block;font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px}
+  input{font-family:inherit;font-size:18px;width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:13px;outline:none;text-align:center;font-weight:700}
+  input:focus{border-color:var(--celeste-deep)}
+  #pinInput{letter-spacing:.4em;text-transform:uppercase;font-family:'Anton',sans-serif;font-size:30px}
+  .opts-seg{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{flex:0 0 auto;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;color:var(--muted)}
+  .chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+  /* host lobby */
+  .pin-box{text-align:center;background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:var(--shadow);margin-bottom:16px}
+  .pin-box .lbl2{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .pin{font-family:'Anton',sans-serif;font-size:clamp(54px,15vw,96px);line-height:1;letter-spacing:.08em;color:var(--navy)}
+  .joinurl{font-size:14px;color:var(--muted);word-break:break-all;margin-top:6px}
+  #qrbox{display:flex;justify-content:center;margin:14px 0 4px}
+  #qrbox img,#qrbox canvas{border-radius:12px;border:6px solid #fff;box-shadow:var(--shadow-sm)}
+  .players{display:flex;flex-wrap:wrap;gap:9px;margin-top:6px;justify-content:center}
+  .ptag{background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:8px 15px;font-weight:700;font-size:15px;box-shadow:var(--shadow-sm);animation:pop .25s ease}
+  @keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+  .count-pill{font-weight:800;color:var(--celeste-deep)}
+
+  /* question */
+  .qtop{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+  .catbadge{color:#fff;font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-size:13px;padding:8px 14px;border-radius:999px}
+  .qnum{font-weight:700;color:var(--muted);font-size:14px}
+  .timer-ring{position:relative;width:64px;height:64px;flex:0 0 auto}
+  .timer-ring svg{transform:rotate(-90deg)}
+  .timer-ring .t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Anton',sans-serif;font-size:26px}
+  .qbig{font-size:clamp(22px,4vw,32px);font-weight:800;line-height:1.28;text-align:center;margin:14px 0 18px;padding:0 6px}
+  .answers{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .ans{border:0;cursor:pointer;font-family:inherit;color:#fff;font-weight:800;font-size:18px;border-radius:16px;padding:22px 16px;text-align:left;display:flex;gap:14px;align-items:center;min-height:88px;transition:transform .08s,filter .15s;box-shadow:var(--shadow-sm)}
+  .ans:active{transform:scale(.98)}
+  .ans .shape{flex:0 0 auto;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:800}
+  .ans.c1{background:var(--a1)} .ans.c2{background:var(--a2)} .ans.c3{background:var(--a3);color:var(--navy)} .ans.c4{background:var(--a4)}
+  .ans.dim{filter:grayscale(.6) brightness(.85);opacity:.5}
+  .ans.right{outline:5px solid #0d5e34;outline-offset:2px}
+  .answered-banner{text-align:center}
+  .answered-banner .big{font-family:'Anton',sans-serif;font-size:40px;text-transform:uppercase}
+  .respond-count{text-align:center;font-weight:700;color:var(--muted);margin-top:16px}
+
+  /* leaderboard */
+  .lb{display:flex;flex-direction:column;gap:9px;margin:14px 0}
+  .lb-row{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow-sm)}
+  .lb-row .pos{font-family:'Anton',sans-serif;font-size:22px;width:30px;text-align:center;color:var(--muted)}
+  .lb-row .nm{font-weight:700;flex:1}
+  .lb-row .pt{font-family:'Anton',sans-serif;font-size:20px}
+  .lb-row.win{border-color:var(--sun-deep);background:linear-gradient(0deg,#fff,#fffdf3)}
+  .lb-row.win .pos{color:var(--sun-deep)}
+  .lb-row.me{border-color:var(--celeste-deep);background:#f1f8fd}
+
+  .feedback{text-align:center;padding:30px 0}
+  .feedback .face{font-size:64px}
+  .feedback .msg{font-family:'Anton',sans-serif;font-size:34px;text-transform:uppercase;margin-top:6px}
+  .feedback .pts{font-size:20px;font-weight:800;color:var(--good);margin-top:4px}
+  .feedback.bad .msg{color:var(--bad)}
+
+  .config-warn{background:var(--bad-bg);border:1.5px solid var(--bad);color:#8a211d;border-radius:14px;padding:14px 16px;font-size:14px;margin-bottom:16px;line-height:1.5}
+  code{background:#eef3f8;padding:2px 6px;border-radius:6px;font-size:13px}
+  .footer-note{text-align:center;color:var(--muted);font-size:12.5px;margin-top:16px}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HOME -->
+  <section id="s-home" class="screen active">
+    <div class="brand center">
+      <div class="live"><span class="dot"></span> En vivo</div>
+      <h1><span class="ar">ARGEN</span><span class="tri">TRIVIA</span></h1>
+      <p class="tagline">Trivia argentina multijugador con eliminación. Tres fases: juegan todos, se van cortando los mejores y en la final queda el campeón. Cada uno desde su celular.</p>
+    </div>
+    <div class="stack">
+      <button class="btn btn-sun" onclick="goHostSetup()">Crear sala (anfitrión)</button>
+      <button class="btn btn-ghost" onclick="show('s-join')">Unirme a una sala</button>
+    </div>
+    <p class="footer-note">Proyectá "Crear sala" · los invitados usan "Unirme"</p>
+  </section>
+
+  <!-- HOST SETUP -->
+  <section id="s-host-setup" class="screen">
+    <div class="brand"><h1 style="font-size:clamp(32px,8vw,48px)">Nueva sala</h1></div>
+    <div id="cfgWarn"></div>
+    <div class="card">
+      <h2 class="section-title">Configurá el torneo</h2>
+      <p class="hint">Tres fases con eliminación: juegan todos, después quedan los mejores y al final el campeón.</p>
+      <label class="lbl">Preguntas por fase</label>
+      <div class="opts-seg" id="qPerRoundOpts"></div>
+      <label class="lbl">Tiempo por pregunta</label>
+      <div class="opts-seg" id="timeOpts"></div>
+      <label class="lbl">Clasifican a la Fase 2</label>
+      <div class="opts-seg" id="adv1Opts"></div>
+      <label class="lbl">Clasifican a la Fase final</label>
+      <div class="opts-seg" id="adv2Opts"></div>
+      <p class="hint" style="margin:14px 0 0">Si entran menos jugadores que el corte, no se elimina a nadie en esa fase.</p>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn btn-ghost" onclick="show('s-home')">Volver</button>
+      <button class="btn btn-sun" id="createBtn" onclick="createRoom()">Crear sala</button>
+    </div>
+  </section>
+
+  <!-- HOST LOBBY -->
+  <section id="s-host-lobby" class="screen">
+    <div class="pin-box">
+      <div class="lbl2">Entrá en <span id="siteHost"></span> y poné el PIN</div>
+      <div class="pin" id="pinShow">----</div>
+      <div id="qrbox"></div>
+      <div class="joinurl" id="joinUrl"></div>
+    </div>
+    <div style="text-align:center;margin-bottom:8px"><span class="count-pill" id="lobbyCount">0</span> jugadores conectados</div>
+    <div class="players" id="lobbyPlayers"></div>
+    <div class="stack">
+      <button class="btn btn-sun" id="startBtn" onclick="hostStart()" disabled>Empezar la partida</button>
+      <button class="btn btn-ghost" onclick="cancelRoom()">Cancelar sala</button>
+    </div>
+  </section>
+
+  <!-- HOST QUESTION -->
+  <section id="s-host-question" class="screen">
+    <div class="qtop">
+      <span class="catbadge" id="hCat">—</span>
+      <span class="qnum" id="hQNum"></span>
+      <div class="timer-ring"><svg width="64" height="64"><circle cx="32" cy="32" r="28" fill="none" stroke="#D6E4F0" stroke-width="7"/><circle id="hRing" cx="32" cy="32" r="28" fill="none" stroke="#3F8FC6" stroke-width="7" stroke-linecap="round"/></svg><div class="t" id="hTime">--</div></div>
+    </div>
+    <div class="qbig" id="hQText"></div>
+    <div class="answers" id="hAnswers"></div>
+    <div class="respond-count" id="hRespond"></div>
+    <div class="stack"><button class="btn btn-ghost" onclick="hostReveal()">Mostrar respuesta ahora</button></div>
+  </section>
+
+  <!-- HOST REVEAL -->
+  <section id="s-host-reveal" class="screen">
+    <div class="brand"><div class="kick" id="hRevealKick">Tabla de posiciones</div></div>
+    <div class="lb" id="hLeaderboard"></div>
+    <div class="stack"><button class="btn btn-sun" id="hNextBtn" onclick="hostNext()">Siguiente pregunta</button></div>
+  </section>
+
+  <!-- HOST ROUND END (clasificación) -->
+  <section id="s-host-roundend" class="screen">
+    <div class="brand"><div class="kick" id="hReKick">Clasificación</div><h1 id="hReTitle" style="font-size:clamp(30px,8vw,48px)"></h1>
+    <p class="tagline" id="hReSub"></p></div>
+    <div class="lb" id="hRoundLb"></div>
+    <div class="stack"><button class="btn btn-sun" id="hRoundBtn" onclick="hostStartNextRound()">Empezar la siguiente fase</button></div>
+  </section>
+
+  <!-- HOST FINAL -->
+  <section id="s-host-final" class="screen">
+    <div class="brand"><div class="kick">Resultado final</div><h1 style="font-size:clamp(38px,10vw,64px)">¡Campeones!</h1></div>
+    <div class="lb" id="hFinal"></div>
+    <div class="stack"><button class="btn btn-ghost" onclick="resetAll()">Nueva sala</button></div>
+  </section>
+
+  <!-- JOIN -->
+  <section id="s-join" class="screen">
+    <div class="brand"><h1 style="font-size:clamp(34px,9vw,52px)">Entrar</h1></div>
+    <div class="card center">
+      <label class="lbl" style="margin-top:0">PIN de la sala</label>
+      <input id="pinInput" maxlength="4" placeholder="PIN" autocomplete="off" autocapitalize="characters">
+      <label class="lbl">Tu nombre o apodo</label>
+      <input id="nameInput" maxlength="16" placeholder="¿Cómo te anotamos?" autocomplete="off">
+      <button class="btn btn-sun" style="margin-top:20px" onclick="joinRoom()">Entrar a jugar</button>
+      <p class="hint" id="joinErr" style="color:var(--bad);text-align:center;margin:12px 0 0;display:none"></p>
+    </div>
+    <div class="stack"><button class="btn btn-ghost" onclick="show('s-home')">Volver</button></div>
+  </section>
+
+  <!-- PLAYER LOBBY -->
+  <section id="s-player-lobby" class="screen">
+    <div class="brand center">
+      <div class="kick">Estás dentro</div>
+      <h1 id="pName" style="font-size:clamp(34px,9vw,56px)"></h1>
+      <p class="tagline">Mirá la pantalla grande. La partida arranca en un toque…</p>
+    </div>
+  </section>
+
+  <!-- PLAYER QUESTION -->
+  <section id="s-player-question" class="screen">
+    <div class="qtop">
+      <span class="catbadge" id="pCat">—</span>
+      <span class="qnum" id="pQNum"></span>
+      <div class="timer-ring"><svg width="64" height="64"><circle cx="32" cy="32" r="28" fill="none" stroke="#D6E4F0" stroke-width="7"/><circle id="pRing" cx="32" cy="32" r="28" fill="none" stroke="#3F8FC6" stroke-width="7" stroke-linecap="round"/></svg><div class="t" id="pTime">--</div></div>
+    </div>
+    <div class="qbig" id="pQText" style="font-size:20px"></div>
+    <div class="answers" id="pAnswers"></div>
+  </section>
+
+  <!-- PLAYER ANSWERED / FEEDBACK -->
+  <section id="s-player-wait" class="screen">
+    <div class="feedback center" id="pFeedback">
+      <div class="big" style="font-family:'Anton',sans-serif;font-size:36px;text-transform:uppercase">¡Respuesta enviada!</div>
+      <p class="tagline">Esperando al resto…</p>
+    </div>
+  </section>
+
+  <!-- PLAYER ELIMINADO (espectador) -->
+  <section id="s-player-out" class="screen">
+    <div class="feedback center">
+      <div class="face">👀</div>
+      <div class="msg" id="pOutTitle" style="color:var(--bad)">Quedaste afuera</div>
+      <p class="tagline" id="pOutSub"></p>
+    </div>
+  </section>
+
+  <!-- PLAYER FINAL -->
+  <section id="s-player-final" class="screen">
+    <div class="brand center"><div class="kick">Terminó el juego</div><h1 id="pFinalRank" style="font-size:clamp(30px,8vw,48px)"></h1>
+    <p class="tagline" id="pFinalPts"></p></div>
+    <div class="stack"><button class="btn btn-ghost" onclick="resetAll()">Salir</button></div>
+  </section>
+
+</div>
+
+<!-- Firebase + QR -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* =======================================================================
+   PASO ÚNICO PARA QUE FUNCIONE: pegá acá la config de tu proyecto Firebase
+   (Firebase → Configuración del proyecto → tus apps → SDK web → config).
+   Activá "Realtime Database" en modo de prueba. Es gratis y alcanza de sobra.
+   ======================================================================= */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC45WavH9IMaGH9MM2iF7YbeccixUaCrTU",
+  authDomain: "argentrivia-6d57b.firebaseapp.com",
+  databaseURL: "https://argentrivia-6d57b-default-rtdb.firebaseio.com",
+  projectId: "argentrivia-6d57b",
+  storageBucket: "argentrivia-6d57b.firebasestorage.app",
+  messagingSenderId: "477985487583",
+  appId: "1:477985487583:web:604fd98b12e24b0fdf876a",
+  measurementId: "G-V8NEVNTRSY"
+};
+
+/* ---------- preguntas (80) ---------- */
+const CATS={historia:{name:'Historia',color:'#C0392B'},geografia:{name:'Geografía y viajes',color:'#2E9E6B'},cultura:{name:'Cultura pop',color:'#B5489A'},deporte:{name:'Deporte',color:'#2E6FB7'}};
+const QUESTIONS=[
+  {cat:'historia',q:'¿Quién fundó por primera vez Buenos Aires, en 1536?',options:['Pedro de Mendoza','Juan de Garay','Hernandarias','Sebastián Gaboto'],correct:0},
+  {cat:'historia',q:'¿Quién realizó la segunda y definitiva fundación de Buenos Aires en 1580?',options:['Juan de Garay','Pedro de Mendoza','Cabeza de Vaca','Diego de Rojas'],correct:0},
+  {cat:'historia',q:'¿Qué se conmemora el 25 de mayo de 1810?',options:['La Revolución de Mayo','La Independencia','La Constitución','La batalla de San Lorenzo'],correct:0},
+  {cat:'historia',q:'¿En qué ciudad se declaró la Independencia en 1816?',options:['San Miguel de Tucumán','Buenos Aires','Córdoba','Salta'],correct:0},
+  {cat:'historia',q:'¿Quién cruzó los Andes para liberar Chile y Perú?',options:['José de San Martín','Manuel Belgrano','Martín Güemes','Bernardino Rivadavia'],correct:0},
+  {cat:'historia',q:'¿Quién creó la bandera argentina?',options:['Manuel Belgrano','José de San Martín','Mariano Moreno','Cornelio Saavedra'],correct:0},
+  {cat:'historia',q:'¿En qué ciudad enarboló Belgrano la bandera por primera vez, en 1812?',options:['Rosario','Buenos Aires','Tucumán','Jujuy'],correct:0},
+  {cat:'historia',q:'¿Quién escribió la letra del Himno Nacional?',options:['Vicente López y Planes','Esteban Echeverría','Bartolomé Mitre','Blas Parera'],correct:0},
+  {cat:'historia',q:'¿Quién compuso la música del Himno Nacional?',options:['Blas Parera','Vicente López y Planes','Juan Pedro Esnaola','Juan Bautista Alberdi'],correct:0},
+  {cat:'historia',q:'¿En qué año se sancionó la Constitución Nacional?',options:['1853','1816','1880','1810'],correct:0},
+  {cat:'historia',q:'¿Quién fue el primer presidente bajo la Constitución de 1853?',options:['Justo José de Urquiza','Bartolomé Mitre','Domingo F. Sarmiento','Bernardino Rivadavia'],correct:0},
+  {cat:'historia',q:'¿A qué presidente se lo recuerda como "el padre del aula"?',options:['Domingo F. Sarmiento','Bartolomé Mitre','Nicolás Avellaneda','Julio A. Roca'],correct:0},
+  {cat:'historia',q:'¿Qué ley de 1912 estableció el voto secreto, universal y obligatorio?',options:['Ley Sáenz Peña','Ley 1420','Ley de Residencia','Ley Avellaneda'],correct:0},
+  {cat:'historia',q:'¿Quién fue el primer presidente electo por voto popular tras la Ley Sáenz Peña, en 1916?',options:['Hipólito Yrigoyen','Marcelo T. de Alvear','Juan Domingo Perón','Julio A. Roca'],correct:0},
+  {cat:'historia',q:'¿Qué ley de 1947 reconoció el voto femenino en Argentina?',options:['Ley 13.010','Ley 1420','Ley Sáenz Peña','Ley de Sufragio'],correct:0},
+  {cat:'historia',q:'¿Quién fue la primera mujer en ejercer la presidencia de la Nación?',options:['María Estela Martínez de Perón','Eva Perón','Cristina Fernández','Alicia Moreau'],correct:0},
+  {cat:'historia',q:'¿En qué año volvió la democracia tras la última dictadura?',options:['1983','1976','1989','1973'],correct:0},
+  {cat:'historia',q:'¿Quién asumió la presidencia en 1983 con el regreso de la democracia?',options:['Raúl Alfonsín','Carlos Menem','Arturo Illia','Arturo Frondizi'],correct:0},
+  {cat:'historia',q:'¿Qué guerra enfrentó a Argentina y el Reino Unido en 1982?',options:['La Guerra de Malvinas','La Guerra del Paraguay','La Guerra del Chaco','La Guerra de la Triple Alianza'],correct:0},
+  {cat:'historia',q:'¿Qué caudillo defendió el norte con la "guerra gaucha" frente a los realistas?',options:['Martín Miguel de Güemes','José de San Martín','Manuel Belgrano','Manuel Dorrego'],correct:0},
+  {cat:'geografia',q:'¿Cuál es el pico más alto de América?',options:['El Aconcagua','El Tupungato','El Mercedario','El Lanín'],correct:0},
+  {cat:'geografia',q:'¿En qué provincia está el Aconcagua?',options:['Mendoza','San Juan','Salta','Neuquén'],correct:0},
+  {cat:'geografia',q:'¿En qué provincia están las Cataratas del Iguazú?',options:['Misiones','Corrientes','Formosa','Chaco'],correct:0},
+  {cat:'geografia',q:'¿Cómo se llama el glaciar más famoso, en Santa Cruz?',options:['Perito Moreno','Upsala','Viedma','Spegazzini'],correct:0},
+  {cat:'geografia',q:'¿Cuántas provincias tiene Argentina (sin contar la Ciudad de Buenos Aires)?',options:['23','22','24','25'],correct:0},
+  {cat:'geografia',q:'¿Cuál es el río más largo que recorre el país?',options:['El Paraná','El Uruguay','El Colorado','El Salado'],correct:0},
+  {cat:'geografia',q:'¿Qué ciudad es conocida como "La Docta"?',options:['Córdoba','La Plata','Rosario','Tucumán'],correct:0},
+  {cat:'geografia',q:'¿En qué provincia está San Carlos de Bariloche?',options:['Río Negro','Neuquén','Chubut','Mendoza'],correct:0},
+  {cat:'geografia',q:'¿Cuál es la ciudad más austral del mundo?',options:['Ushuaia','Río Grande','Río Gallegos','Punta Arenas'],correct:0},
+  {cat:'geografia',q:'¿Qué provincia es la principal región vitivinícola del país?',options:['Mendoza','San Juan','La Rioja','Salta'],correct:0},
+  {cat:'geografia',q:'¿En qué provincia está la Quebrada de Humahuaca?',options:['Jujuy','Salta','Catamarca','Tucumán'],correct:0},
+  {cat:'geografia',q:'¿En qué provincia está la Península Valdés, famosa por las ballenas?',options:['Chubut','Santa Cruz','Río Negro','Buenos Aires'],correct:0},
+  {cat:'geografia',q:'¿Cuál es la capital de Tierra del Fuego?',options:['Ushuaia','Río Grande','Tolhuin','Rawson'],correct:0},
+  {cat:'geografia',q:'¿Cuál es el lago de mayor superficie del país?',options:['Lago Argentino','Nahuel Huapi','Lago Viedma','Lago Musters'],correct:0},
+  {cat:'geografia',q:'¿Qué cordillera atraviesa todo el oeste argentino?',options:['Los Andes','Sierra de la Ventana','Sierras de Córdoba','Sierras Subandinas'],correct:0},
+  {cat:'geografia',q:'¿Con cuál de estos países NO limita Argentina?',options:['Perú','Chile','Bolivia','Brasil'],correct:0},
+  {cat:'geografia',q:'¿Cuál es la provincia más extensa del país?',options:['Buenos Aires','Santa Cruz','Chubut','Río Negro'],correct:0},
+  {cat:'geografia',q:'¿En qué región se encuentran las Salinas Grandes?',options:['El Noroeste (Jujuy y Salta)','La Patagonia','El Litoral','La región pampeana'],correct:0},
+  {cat:'geografia',q:'¿Desde qué provincia parte el famoso "Tren a las Nubes"?',options:['Salta','Jujuy','Mendoza','Catamarca'],correct:0},
+  {cat:'geografia',q:'¿Cuál es la capital de la provincia de Buenos Aires?',options:['La Plata','Mar del Plata','Bahía Blanca','San Isidro'],correct:0},
+  {cat:'cultura',q:'¿Qué dibujante creó a Mafalda?',options:['Quino','Roberto Fontanarrosa','Caloi','Liniers'],correct:0},
+  {cat:'cultura',q:'¿Qué humorista gráfico creó a "Inodoro Pereyra"?',options:['Roberto Fontanarrosa','Quino','Caloi','Nik'],correct:0},
+  {cat:'cultura',q:'¿Qué banda lideraba Gustavo Cerati?',options:['Soda Stereo','Sumo','Virus','Los Redondos'],correct:0},
+  {cat:'cultura',q:'¿Quién escribió "El Aleph" y "Ficciones"?',options:['Jorge Luis Borges','Julio Cortázar','Ernesto Sabato','Adolfo Bioy Casares'],correct:0},
+  {cat:'cultura',q:'¿Quién escribió "Rayuela"?',options:['Julio Cortázar','Jorge Luis Borges','Ernesto Sabato','Roberto Arlt'],correct:0},
+  {cat:'cultura',q:'¿Qué película argentina ganó el Oscar a film extranjero en 2010?',options:['El secreto de sus ojos','Relatos salvajes','La historia oficial','Nueve reinas'],correct:0},
+  {cat:'cultura',q:'¿Qué film de 1986 fue el primer Oscar al cine extranjero para Argentina?',options:['La historia oficial','El secreto de sus ojos','Camila','La tregua'],correct:0},
+  {cat:'cultura',q:'¿A qué músico le dicen "el Flaco"?',options:['Luis Alberto Spinetta','Charly García','Fito Páez','Andrés Calamaro'],correct:0},
+  {cat:'cultura',q:'¿Quién compuso "Libertango" y renovó el tango?',options:['Astor Piazzolla','Carlos Gardel','Osvaldo Pugliese','Aníbal Troilo'],correct:0},
+  {cat:'cultura',q:'¿Qué cantante de tango murió en un accidente aéreo en Medellín en 1935?',options:['Carlos Gardel','Julio Sosa','Edmundo Rivero','Hugo del Carril'],correct:0},
+  {cat:'cultura',q:'¿Qué infusión se toma con bombilla?',options:['El mate','El té','El café','El mate cocido'],correct:0},
+  {cat:'cultura',q:'¿Qué dulce a base de leche es un emblema nacional?',options:['El dulce de leche','El dulce de membrillo','El dulce de batata','El cayote'],correct:0},
+  {cat:'cultura',q:'¿Con qué banda debutó Charly García junto a Nito Mestre?',options:['Sui Generis','Serú Girán','Almendra','La Máquina de Hacer Pájaros'],correct:0},
+  {cat:'cultura',q:'¿A qué cantante de cuarteto cordobés le dicen "La Mona"?',options:['Carlos Jiménez','Rodrigo','Damián Córdoba','Walter Olmos'],correct:0},
+  {cat:'cultura',q:'¿Quién es el autor de la historieta "El Eternauta"?',options:['Héctor Germán Oesterheld','Quino','Alberto Breccia','Roberto Fontanarrosa'],correct:0},
+  {cat:'cultura',q:'¿Qué cuartetero, apodado "El Potro", falleció en el año 2000?',options:['Rodrigo Bueno','La Mona Jiménez','Walter Olmos','Sebastián'],correct:0},
+  {cat:'cultura',q:'¿Qué banda lideró el Indio Solari y marcó el rock de los 90?',options:['Los Redondos','Soda Stereo','Sumo','Bersuit Vergarabat'],correct:0},
+  {cat:'cultura',q:'¿Qué conductora es famosa por sus "almuerzos" en la televisión?',options:['Mirtha Legrand','Susana Giménez','Moria Casán','Juana Viale'],correct:0},
+  {cat:'cultura',q:'¿Qué película de Damián Szifrón (2014) fue nominada al Oscar?',options:['Relatos salvajes','El secreto de sus ojos','Nueve reinas','El clan'],correct:0},
+  {cat:'cultura',q:'¿Qué bebida amarga, mezclada con cola, es típica especialmente en Córdoba?',options:['El fernet','El vermut','El gancia','La hesperidina'],correct:0},
+  {cat:'deporte',q:'¿En qué año ganó Argentina el Mundial de Qatar?',options:['2022','2018','2014','2010'],correct:0},
+  {cat:'deporte',q:'¿Cuántos Mundiales de fútbol ganó Argentina?',options:['Tres','Dos','Cuatro','Uno'],correct:0},
+  {cat:'deporte',q:'¿En qué país se jugó el Mundial 1978 que ganó Argentina?',options:['Argentina','España','México','Alemania'],correct:0},
+  {cat:'deporte',q:'¿Cómo se apoda a la selección femenina de hockey sobre césped?',options:['Las Leonas','Las Pumas','Las Águilas','Las Garzas'],correct:0},
+  {cat:'deporte',q:'¿Cómo se llama la selección masculina de rugby?',options:['Los Pumas','Los Cóndores','Los Teros','Los Jaguares'],correct:0},
+  {cat:'deporte',q:'¿Quién hizo "la mano de Dios" y "el gol del siglo" en 1986?',options:['Diego Maradona','Mario Kempes','Gabriel Batistuta','Lionel Messi'],correct:0},
+  {cat:'deporte',q:'¿Qué automovilista argentino ganó cinco títulos de Fórmula 1?',options:['Juan Manuel Fangio','Carlos Reutemann','Froilán González','Oscar Gálvez'],correct:0},
+  {cat:'deporte',q:'¿En qué Juegos Olímpicos ganó el oro la "Generación Dorada" del básquet?',options:['Atenas 2004','Sídney 2000','Beijing 2008','Londres 2012'],correct:0},
+  {cat:'deporte',q:'¿Qué basquetbolista argentino fue campeón de la NBA con San Antonio Spurs?',options:['Manu Ginóbili','Luis Scola','Andrés Nocioni','Facundo Campazzo'],correct:0},
+  {cat:'deporte',q:'¿En qué año ganó Argentina su primera Copa Davis de tenis?',options:['2016','2008','2011','2006'],correct:0},
+  {cat:'deporte',q:'¿En qué dos Juegos Olímpicos seguidos ganó el oro el fútbol masculino?',options:['Atenas 2004 y Beijing 2008','Sídney 2000 y Atenas 2004','Beijing 2008 y Londres 2012','Atlanta 1996 y Sídney 2000'],correct:0},
+  {cat:'deporte',q:'¿En qué club europeo debutó como profesional Lionel Messi?',options:['FC Barcelona','Real Madrid','PSG','Manchester City'],correct:0},
+  {cat:'deporte',q:'¿En qué club argentino debutó futbolísticamente Diego Maradona?',options:['Argentinos Juniors','Boca Juniors','River Plate','Independiente'],correct:0},
+  {cat:'deporte',q:'¿Qué delantero, "el Matador", fue máximo goleador histórico de la selección antes de Messi?',options:['Gabriel Batistuta','Mario Kempes','Hernán Crespo','Gonzalo Higuaín'],correct:0},
+  {cat:'deporte',q:'¿Qué tenista argentino fue número 1 mundial y figura de los años 70 y 80?',options:['Guillermo Vilas','José Luis Clerc','David Nalbandian','Juan Martín del Potro'],correct:0},
+  {cat:'deporte',q:'¿En qué deporte se destacó Luciana Aymar, ocho veces mejor del mundo?',options:['Hockey sobre césped','Tenis','Vóley','Natación'],correct:0},
+  {cat:'deporte',q:'¿Qué boxeador santafesino fue campeón mundial de peso mediano en los años 70?',options:['Carlos Monzón','Nicolino Locche','Pascual Pérez','Oscar Bonavena'],correct:0},
+  {cat:'deporte',q:'¿En qué deporte fueron campeones mundiales "Los Murciélagos"?',options:['Fútbol para ciegos','Vóley','Handball','Básquet'],correct:0},
+  {cat:'deporte',q:'¿Qué mediocampista de Boca, apodado "Román", usó la camiseta número 10?',options:['Juan Román Riquelme','Juan Sebastián Verón','Pablo Aimar',"Andrés D'Alessandro"],correct:0},
+  {cat:'deporte',q:'¿Quién atajó el penal decisivo en la tanda de la final del Mundial 2022?',options:['Emiliano "Dibu" Martínez','Sergio Romero','Mariano Andújar','Franco Armani'],correct:0},
+];
+
+/* ---------- estado / firebase ---------- */
+let db=null, fbReady=false;
+let cfg={qPerRound:10,timerSecs:30,adv1:20,adv2:10};
+let pin=null, roomRef=null, role=null;
+let playerId=null, playerName=null, myAnswered=false;
+let hostTimer=null, ringTimer=null;
+let lastStatus=null, lastKey=null;
+const ROUND_NAMES=['Fase 1','Fase 2','Fase final'];
+const SHAPES=['▲','◆','●','■'];
+
+(function initFirebase(){
+  try{
+    if(typeof FIREBASE_CONFIG==='undefined'||!FIREBASE_CONFIG||!FIREBASE_CONFIG.apiKey||FIREBASE_CONFIG.apiKey.startsWith('PEGÁ')) return;
+    firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database(); fbReady=true;
+  }catch(e){ console.error('Firebase init:',e); fbReady=false; }
+})();
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+
+/* ---------- setup options ---------- */
+function seg(elId,values,current,fmt,onpick){
+  document.getElementById(elId).innerHTML=values.map(v=>`<button class="chip ${current===v?'active':''}" onclick="${onpick}(${v})">${fmt(v)}</button>`).join('');
+}
+function renderSetup(){
+  const cw=document.getElementById('cfgWarn');
+  cw.innerHTML = fbReady ? '' : `<div class="config-warn"><b>Falta conectar Firebase.</b> Pegá la config de tu proyecto en <code>FIREBASE_CONFIG</code> (arriba del script) y subí el archivo a tu dominio. Sin eso la sala no se crea.</div>`;
+  document.getElementById('createBtn').disabled=!fbReady;
+  seg('qPerRoundOpts',[8,10,12],cfg.qPerRound,n=>n+' preguntas','setQPR');
+  seg('timeOpts',[30,45],cfg.timerSecs,n=>n+' s','setTime');
+  seg('adv1Opts',[30,20,16],cfg.adv1,n=>'Top '+n,'setAdv1');
+  seg('adv2Opts',[12,10,8],cfg.adv2,n=>'Top '+n,'setAdv2');
+}
+function setQPR(n){cfg.qPerRound=n;renderSetup();}
+function setTime(n){cfg.timerSecs=n;renderSetup();}
+function setAdv1(n){cfg.adv1=n; if(cfg.adv2>=n)cfg.adv2=Math.min(cfg.adv2,n-2); renderSetup();}
+function setAdv2(n){cfg.adv2=n;renderSetup();}
+function goHostSetup(){renderSetup();show('s-host-setup');}
+
+/* ---------- host: crear sala ---------- */
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function makePin(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
+function createRoom(){
+  if(!fbReady)return;
+  pin=makePin(); role='host';
+  const need=cfg.qPerRound*3;
+  const pool=shuffle(QUESTIONS).slice(0,Math.min(need,QUESTIONS.length)).map(q=>({cat:q.cat,q:q.q,options:q.options,correct:q.correct}));
+  const rounds=[pool.slice(0,cfg.qPerRound),pool.slice(cfg.qPerRound,cfg.qPerRound*2),pool.slice(cfg.qPerRound*2,cfg.qPerRound*3)];
+  roomRef=db.ref('rooms/'+pin);
+  roomRef.set({status:'lobby',round:0,roundCount:3,questionIndex:-1,qPerRound:cfg.qPerRound,
+    timerSecs:cfg.timerSecs,advancers:[cfg.adv1,cfg.adv2],rounds:rounds,currentStartedAt:0,
+    players:{},answers:{},createdAt:firebase.database.ServerValue.TIMESTAMP});
+  document.getElementById('pinShow').textContent=pin;
+  document.getElementById('siteHost').textContent=location.host||'el sitio';
+  const joinURL=location.origin+location.pathname+'#join='+pin;
+  document.getElementById('joinUrl').textContent=joinURL;
+  const qb=document.getElementById('qrbox');qb.innerHTML='';
+  try{ new QRCode(qb,{text:joinURL,width:190,height:190,colorDark:'#0E2A47',colorLight:'#ffffff'}); }catch(e){}
+  listenRoomHost();
+  show('s-host-lobby');
+}
+function cancelRoom(){ if(roomRef){roomRef.remove();} cleanup(); show('s-home'); }
+
+function listenRoomHost(){
+  roomRef.child('players').on('value',s=>{
+    const players=s.val()||{};
+    const names=Object.values(players).map(p=>p.name);
+    document.getElementById('lobbyCount').textContent=names.length;
+    document.getElementById('lobbyPlayers').innerHTML=names.map(n=>`<span class="ptag">${esc(n)}</span>`).join('');
+    document.getElementById('startBtn').disabled=names.length<1;
+  });
+  roomRef.child('answers').on('value',s=>{
+    if(lastStatus!=='question'||!lastKey)return;
+    const ans=s.val()||{};
+    const got=ans[lastKey]?Object.keys(ans[lastKey]).length:0;
+    roomRef.child('players').once('value',ps=>{
+      const ps_=ps.val()||{};
+      const active=Object.values(ps_).filter(p=>!p.eliminated).length;
+      document.getElementById('hRespond').textContent=`${got} de ${active} respondieron`;
+      if(active>0 && got>=active) hostReveal();
+    });
+  });
+  roomRef.on('value',s=>{ const r=s.val(); if(!r)return; renderHostByStatus(r); });
+}
+function hostStart(){ roomRef.update({round:0,questionIndex:0,status:'question',currentStartedAt:firebase.database.ServerValue.TIMESTAMP}); }
+function hostReveal(){ clearTimeout(hostTimer); if(lastStatus==='question') roomRef.update({status:'reveal'}); }
+function hostNext(){
+  roomRef.once('value',s=>{
+    const r=s.val(); const next=r.questionIndex+1;
+    if(next<r.qPerRound){
+      roomRef.update({questionIndex:next,status:'question',currentStartedAt:firebase.database.ServerValue.TIMESTAMP});
+    }else{
+      // fin de la fase
+      if(r.round+1<r.roundCount){ classify(r); roomRef.update({status:'roundend'}); }
+      else { finalize(r); roomRef.update({status:'ended'}); }
+    }
+  });
+}
+function hostStartNextRound(){
+  roomRef.once('value',s=>{
+    const r=s.val();
+    roomRef.update({round:r.round+1,questionIndex:0,status:'question',currentStartedAt:firebase.database.ServerValue.TIMESTAMP});
+  });
+}
+/* elimina al fondo de la tabla dejando el top advancers[round] */
+function classify(r){
+  const players=r.players||{};
+  const active=Object.entries(players).filter(([id,p])=>!p.eliminated).map(([id,p])=>({id,...p}))
+                .sort((a,b)=>(b.score||0)-(a.score||0));
+  const cap=r.advancers[r.round];
+  if(active.length<=cap) return; // no se elimina a nadie
+  const cut=active.slice(cap);
+  const updates={};
+  cut.forEach((p,i)=>{ updates['players/'+p.id+'/eliminated']=true;
+    updates['players/'+p.id+'/elimRound']=r.round; updates['players/'+p.id+'/finalPos']=cap+1+i; });
+  roomRef.update(updates);
+}
+function finalize(r){
+  const players=r.players||{};
+  const active=Object.entries(players).filter(([id,p])=>!p.eliminated).map(([id,p])=>({id,...p}))
+                .sort((a,b)=>(b.score||0)-(a.score||0));
+  const updates={};
+  active.forEach((p,i)=>{ updates['players/'+p.id+'/finalPos']=i+1; });
+  roomRef.update(updates);
+}
+function renderHostByStatus(r){
+  lastStatus=r.status; lastKey=r.round+'-'+r.questionIndex;
+  if(r.status==='question'){
+    const q=r.rounds[r.round][r.questionIndex]; const c=CATS[q.cat];
+    document.getElementById('hCat').textContent=c.name; document.getElementById('hCat').style.background=c.color;
+    document.getElementById('hQNum').textContent=`${ROUND_NAMES[r.round]} · Pregunta ${r.questionIndex+1}/${r.qPerRound}`;
+    document.getElementById('hQText').textContent=q.q;
+    document.getElementById('hAnswers').innerHTML=q.options.map((o,i)=>`<div class="ans c${i+1}"><span class="shape">${SHAPES[i]}</span><span>${esc(o)}</span></div>`).join('');
+    document.getElementById('hRespond').textContent='0 respondieron';
+    startRing('h',r.currentStartedAt,r.timerSecs);
+    clearTimeout(hostTimer);
+    const ms=r.timerSecs*1000-(Date.now()-r.currentStartedAt);
+    hostTimer=setTimeout(()=>hostReveal(),Math.max(500,ms+400));
+    show('s-host-question');
+  }else if(r.status==='reveal'){
+    clearTimeout(hostTimer); stopRing();
+    document.getElementById('hRevealKick').textContent=`${ROUND_NAMES[r.round]} · posiciones`;
+    renderLeaderboard(r,'hLeaderboard',false);
+    const lastOfRound=(r.questionIndex+1>=r.qPerRound);
+    document.getElementById('hNextBtn').textContent = lastOfRound
+      ? (r.round+1<r.roundCount?'Cerrar la fase':'Ver campeón')
+      : 'Siguiente pregunta';
+    show('s-host-reveal');
+  }else if(r.status==='roundend'){
+    clearTimeout(hostTimer);
+    const cap=r.advancers[r.round];
+    document.getElementById('hReKick').textContent=`Fin de ${ROUND_NAMES[r.round]}`;
+    document.getElementById('hReTitle').textContent=`Pasan los mejores ${cap}`;
+    const active=Object.values(r.players||{}).filter(p=>!p.eliminated).length;
+    document.getElementById('hReSub').textContent=`Siguen en carrera ${active} jugadores · ${ROUND_NAMES[r.round+1]} a continuación`;
+    renderClassification(r,cap);
+    document.getElementById('hRoundBtn').textContent=`Empezar ${ROUND_NAMES[r.round+1]}`;
+    show('s-host-roundend');
+  }else if(r.status==='ended'){
+    clearTimeout(hostTimer); renderLeaderboard(r,'hFinal',true); show('s-host-final');
+  }
+}
+function renderLeaderboard(r,elId,final){
+  const players=r.players||{};
+  let arr=Object.values(players);
+  if(!final) arr=arr.filter(p=>!p.eliminated);
+  arr.sort((a,b)=>(b.score||0)-(a.score||0));
+  const top=arr[0]?arr[0].score||0:0;
+  document.getElementById(elId).innerHTML=arr.slice(0,final?20:10).map((p,i)=>`
+    <div class="lb-row ${final&&i===0&&top>0?'win':''}">
+      <span class="pos">${i+1}</span><span class="nm">${esc(p.name)}</span><span class="pt">${p.score||0}</span>
+    </div>`).join('') || '<p class="hint" style="text-align:center">Sin jugadores</p>';
+}
+/* tabla del corte: top cap resaltado, el resto en gris (eliminados) */
+function renderClassification(r,cap){
+  const arr=Object.values(r.players||{}).sort((a,b)=>(b.score||0)-(a.score||0));
+  document.getElementById('hRoundLb').innerHTML=arr.slice(0,Math.max(cap+5,12)).map((p,i)=>{
+    const out=p.eliminated;
+    return `<div class="lb-row" style="${out?'opacity:.45;':'border-color:var(--good);'}">
+      <span class="pos">${i+1}</span><span class="nm">${esc(p.name)} ${out?'· eliminado':'· ✅'}</span><span class="pt">${p.score||0}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- player ---------- */
+function joinRoom(){
+  const err=document.getElementById('joinErr'); err.style.display='none';
+  if(!fbReady){err.textContent='Esta sala todavía no está conectada a Firebase.';err.style.display='block';return;}
+  const p=(document.getElementById('pinInput').value||'').trim().toUpperCase();
+  const nm=(document.getElementById('nameInput').value||'').trim();
+  if(p.length<4){err.textContent='El PIN tiene 4 caracteres.';err.style.display='block';return;}
+  if(!nm){err.textContent='Poné un nombre.';err.style.display='block';return;}
+  db.ref('rooms/'+p).once('value',s=>{
+    if(!s.exists()){err.textContent='No existe una sala con ese PIN.';err.style.display='block';return;}
+    const r=s.val();
+    if(r.status!=='lobby'){err.textContent='Esa partida ya empezó.';err.style.display='block';return;}
+    pin=p; role='player'; playerName=nm; roomRef=db.ref('rooms/'+pin);
+    const pref=roomRef.child('players').push();
+    playerId=pref.key; pref.set({name:nm,score:0,eliminated:false});
+    pref.onDisconnect().remove();
+    document.getElementById('pName').textContent=nm;
+    listenRoomPlayer(); show('s-player-lobby');
+  });
+}
+function listenRoomPlayer(){
+  roomRef.on('value',s=>{ const r=s.val(); if(!r){alert('La sala se cerró.');resetAll();return;} renderPlayerByStatus(r); });
+}
+function renderPlayerByStatus(r){
+  const me=(r.players||{})[playerId]||{};
+  if(r.status==='question'){
+    if(me.eliminated){ showSpectator(r,me); return; }
+    const key=r.round+'-'+r.questionIndex;
+    if(lastKey!==key){ myAnswered=false; lastKey=key; }
+    if(myAnswered){ show('s-player-wait'); return; }
+    const q=r.rounds[r.round][r.questionIndex]; const c=CATS[q.cat];
+    document.getElementById('pCat').textContent=c.name; document.getElementById('pCat').style.background=c.color;
+    document.getElementById('pQNum').textContent=`${ROUND_NAMES[r.round]} · ${r.questionIndex+1}/${r.qPerRound}`;
+    document.getElementById('pQText').textContent=q.q;
+    document.getElementById('pAnswers').innerHTML=q.options.map((o,i)=>`<button class="ans c${i+1}" onclick="playerAnswer(${i})"><span class="shape">${SHAPES[i]}</span><span>${esc(o)}</span></button>`).join('');
+    startRing('p',r.currentStartedAt,r.timerSecs);
+    show('s-player-question');
+  }else if(r.status==='reveal'){
+    stopRing();
+    if(me.eliminated){ showSpectator(r,me); return; }
+    showPlayerFeedback(r); show('s-player-wait');
+  }else if(r.status==='roundend'){
+    stopRing(); showRoundEndPlayer(r,me);
+  }else if(r.status==='ended'){
+    stopRing(); showPlayerFinal(r,me); show('s-player-final');
+  }else{ show('s-player-lobby'); }
+}
+function showSpectator(r,me){
+  document.getElementById('pOutTitle').textContent='Quedaste afuera';
+  const pos=me.finalPos?` Terminaste en el puesto #${me.finalPos}.`:'';
+  document.getElementById('pOutSub').textContent=`Caíste en ${ROUND_NAMES[me.elimRound!=null?me.elimRound:0]}.${pos} Seguí el torneo en la pantalla grande.`;
+  show('s-player-out');
+}
+function showRoundEndPlayer(r,me){
+  if(me.eliminated){ showSpectator(r,me); return; }
+  document.getElementById('pFeedback').className='feedback center';
+  document.getElementById('pFeedback').innerHTML=`<div class="face">🎉</div><div class="msg" style="color:var(--good)">¡Clasificaste!</div><p class="tagline">Pasás a ${ROUND_NAMES[r.round+1]}. Llevás ${me.score||0} puntos.</p>`;
+  show('s-player-wait');
+}
+function playerAnswer(choice){
+  if(myAnswered)return; myAnswered=true;
+  roomRef.once('value',s=>{
+    const r=s.val(); const qi=r.questionIndex; const key=r.round+'-'+qi;
+    const q=r.rounds[r.round][qi]; const total=r.timerSecs;
+    const remaining=Math.max(0,total-(Date.now()-r.currentStartedAt)/1000);
+    const correct=(choice===q.correct);
+    const points=correct?Math.round(600+400*(remaining/total)):0;
+    roomRef.child('answers/'+key+'/'+playerId).set({choice,correct,points});
+    if(points>0) roomRef.child('players/'+playerId+'/score').transaction(v=>(v||0)+points);
+    window._lastResult={correct,points};
+    document.getElementById('pFeedback').className='feedback center';
+    document.getElementById('pFeedback').innerHTML=`<div class="big" style="font-family:'Anton',sans-serif;font-size:36px;text-transform:uppercase">¡Enviada!</div><p class="tagline">Esperá el resultado en la pantalla…</p>`;
+    show('s-player-wait');
+  });
+}
+function showPlayerFeedback(r){
+  const res=window._lastResult;
+  const fb=document.getElementById('pFeedback');
+  if(!res){ fb.className='feedback center bad'; fb.innerHTML=`<div class="face">⏱️</div><div class="msg">¡Sin respuesta!</div>`; return; }
+  if(res.correct){ fb.className='feedback center'; fb.innerHTML=`<div class="face">✅</div><div class="msg" style="color:var(--good)">¡Correcto!</div><div class="pts">+${res.points} puntos</div>`; }
+  else { fb.className='feedback center bad'; fb.innerHTML=`<div class="face">❌</div><div class="msg">¡Erraste!</div><p class="tagline">A la próxima la pegás</p>`; }
+  window._lastResult=null;
+}
+function showPlayerFinal(r,me){
+  const pos=me.finalPos||0;
+  document.getElementById('pFinalRank').textContent= pos===1?'🏆 ¡Campeón!':(pos?`Puesto #${pos}`:'¡Terminó!');
+  const total=Object.keys(r.players||{}).length;
+  document.getElementById('pFinalPts').textContent=`${me.score||0} puntos · de ${total} jugadores`;
+}
+
+/* ---------- timer ring ---------- */
+const RING_C=2*Math.PI*28;
+function startRing(who,startedAt,total){
+  stopRing();
+  const ring=document.getElementById(who+'Ring'); const tx=document.getElementById(who+'Time');
+  if(ring){ring.style.strokeDasharray=RING_C; }
+  function tick(){
+    const left=Math.max(0,total-(Date.now()-startedAt)/1000);
+    if(tx)tx.textContent=Math.ceil(left);
+    if(ring){ ring.style.strokeDashoffset=RING_C*(1-left/total);
+      ring.style.stroke= left<=total*0.33?'#D33C36':(left<=total*0.6?'#E0A91F':'#3F8FC6'); }
+    if(left<=0){stopRing();}
+  }
+  tick(); ringTimer=setInterval(tick,100);
+}
+function stopRing(){ if(ringTimer){clearInterval(ringTimer);ringTimer=null;} }
+
+/* ---------- utils ---------- */
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function cleanup(){ if(roomRef){roomRef.off();} clearTimeout(hostTimer); stopRing(); pin=null;roomRef=null;role=null;playerId=null;myAnswered=false;lastStatus=null;lastKey=null; }
+function resetAll(){ if(role==='player'&&roomRef&&playerId){roomRef.child('players/'+playerId).remove();} if(role==='host'&&roomRef){roomRef.remove();} cleanup(); show('s-home'); }
+
+/* deep link join via QR (#join=PIN) */
+(function(){
+  const m=location.hash.match(/join=([A-Za-z0-9]{4})/);
+  if(m){ document.getElementById('pinInput').value=m[1].toUpperCase(); show('s-join'); setTimeout(()=>document.getElementById('nameInput').focus(),200); }
+})();
+</script>
+</body>
+</html>
