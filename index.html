@@ -99,6 +99,13 @@
   .feedback.bad .msg{color:var(--bad)}
 
   .config-warn{background:var(--bad-bg);border:1.5px solid var(--bad);color:#8a211d;border-radius:14px;padding:14px 16px;font-size:14px;margin-bottom:16px;line-height:1.5}
+  .avatars{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+  .ava{font-size:24px;line-height:1;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 0;cursor:pointer;text-align:center;transition:transform .08s,border-color .12s}
+  .ava:active{transform:scale(.94)}
+  .ava.sel{border-color:var(--celeste-deep);background:#eef6fc;transform:scale(1.05)}
+  .lb-row .av{font-size:20px;flex:0 0 auto}
+  .correct-banner{background:var(--good-bg);border:1.5px solid var(--good);color:#0d5e34;border-radius:14px;padding:13px 16px;text-align:center;font-weight:700;margin-bottom:14px;line-height:1.4}
+  .correct-banner b{font-weight:800}
   code{background:#eef3f8;padding:2px 6px;border-radius:6px;font-size:13px}
   .footer-note{text-align:center;color:var(--muted);font-size:12.5px;margin-top:16px}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -116,7 +123,7 @@
     </div>
     <div class="stack">
       <button class="btn btn-sun" onclick="goHostSetup()">Crear sala (anfitrión)</button>
-      <button class="btn btn-ghost" onclick="show('s-join')">Unirme a una sala</button>
+      <button class="btn btn-ghost" onclick="openJoin()">Unirme a una sala</button>
     </div>
     <p class="footer-note">Proyectá "Crear sala" · los invitados usan "Unirme"</p>
   </section>
@@ -136,7 +143,9 @@
       <div class="opts-seg" id="adv1Opts"></div>
       <label class="lbl">Clasifican a la Fase final</label>
       <div class="opts-seg" id="adv2Opts"></div>
-      <p class="hint" style="margin:14px 0 0">Si entran menos jugadores que el corte, no se elimina a nadie en esa fase.</p>
+      <label class="lbl">Avance entre preguntas</label>
+      <div class="opts-seg" id="autoOpts"></div>
+      <p class="hint" style="margin:14px 0 0">Con avance automático el juego corre solo: dejás un celular de anfitrión en la mesa (enchufado) y no hay que tocar nada. Ideal sin pantalla central.</p>
     </div>
     <div class="row" style="margin-top:14px">
       <button class="btn btn-ghost" onclick="show('s-home')">Volver</button>
@@ -176,8 +185,9 @@
   <!-- HOST REVEAL -->
   <section id="s-host-reveal" class="screen">
     <div class="brand"><div class="kick" id="hRevealKick">Tabla de posiciones</div></div>
+    <div id="hCorrect" class="correct-banner"></div>
     <div class="lb" id="hLeaderboard"></div>
-    <div class="stack"><button class="btn btn-sun" id="hNextBtn" onclick="hostNext()">Siguiente pregunta</button></div>
+    <div class="stack"><div id="hNextCountdown" style="text-align:center;color:var(--muted);font-weight:700;margin-bottom:6px"></div><button class="btn btn-sun" id="hNextBtn" onclick="hostNext()">Siguiente pregunta</button></div>
   </section>
 
   <!-- HOST ROUND END (clasificación) -->
@@ -185,7 +195,7 @@
     <div class="brand"><div class="kick" id="hReKick">Clasificación</div><h1 id="hReTitle" style="font-size:clamp(30px,8vw,48px)"></h1>
     <p class="tagline" id="hReSub"></p></div>
     <div class="lb" id="hRoundLb"></div>
-    <div class="stack"><button class="btn btn-sun" id="hRoundBtn" onclick="hostStartNextRound()">Empezar la siguiente fase</button></div>
+    <div class="stack"><div id="hRoundCountdown" style="text-align:center;color:var(--muted);font-weight:700;margin-bottom:6px"></div><button class="btn btn-sun" id="hRoundBtn" onclick="hostStartNextRound()">Empezar la siguiente fase</button></div>
   </section>
 
   <!-- HOST FINAL -->
@@ -203,6 +213,8 @@
       <input id="pinInput" maxlength="4" placeholder="PIN" autocomplete="off" autocapitalize="characters">
       <label class="lbl">Tu nombre o apodo</label>
       <input id="nameInput" maxlength="16" placeholder="¿Cómo te anotamos?" autocomplete="off">
+      <label class="lbl">Elegí tu avatar</label>
+      <div class="avatars" id="avatarPicker"></div>
       <button class="btn btn-sun" style="margin-top:20px" onclick="joinRoom()">Entrar a jugar</button>
       <p class="hint" id="joinErr" style="color:var(--bad);text-align:center;margin:12px 0 0;display:none"></p>
     </div>
@@ -235,6 +247,12 @@
       <div class="big" style="font-family:'Anton',sans-serif;font-size:36px;text-transform:uppercase">¡Respuesta enviada!</div>
       <p class="tagline">Esperando al resto…</p>
     </div>
+  </section>
+
+  <!-- PLAYER RANKING PROVISORIO -->
+  <section id="s-player-rank" class="screen">
+    <div class="brand"><div class="kick" id="pRankKick">Ranking provisorio</div><h1 id="pRankMe" style="font-size:clamp(28px,7vw,44px)"></h1></div>
+    <div class="lb" id="pRankLb"></div>
   </section>
 
   <!-- PLAYER ELIMINADO (espectador) -->
@@ -363,11 +381,14 @@ const QUESTIONS=[
 
 /* ---------- estado / firebase ---------- */
 let db=null, fbReady=false;
-let cfg={qPerRound:10,timerSecs:30,adv1:20,adv2:10};
+let cfg={qPerRound:10,timerSecs:30,adv1:20,adv2:10,auto:true};
 let pin=null, roomRef=null, role=null;
-let playerId=null, playerName=null, myAnswered=false;
-let hostTimer=null, ringTimer=null;
+let playerId=null, playerName=null, myAnswered=false, myResult=null;
+let hostTimer=null, ringTimer=null, autoTimer=null, autoTick=null, wakeLock=null;
 let lastStatus=null, lastKey=null;
+const REVEAL_PAUSE=5, RANK_PAUSE=8, ROUND_PAUSE=12, RANK_EVERY=3;
+const AVATARS=['⚽','🧉','🥩','🦊','🐆','🦁','🐶','🦅','🐺','🍷','🎸','🏆','🦩','🐲','😎','🐢'];
+let selectedAvatar=AVATARS[Math.floor(Math.random()*AVATARS.length)];
 const ROUND_NAMES=['Fase 1','Fase 2','Fase final'];
 const SHAPES=['▲','◆','●','■'];
 
@@ -392,11 +413,21 @@ function renderSetup(){
   seg('timeOpts',[30,45],cfg.timerSecs,n=>n+' s','setTime');
   seg('adv1Opts',[30,20,16],cfg.adv1,n=>'Top '+n,'setAdv1');
   seg('adv2Opts',[12,10,8],cfg.adv2,n=>'Top '+n,'setAdv2');
+  document.getElementById('autoOpts').innerHTML=
+    `<button class="chip ${cfg.auto?'active':''}" onclick="setAuto(1)">Automático</button>`+
+    `<button class="chip ${!cfg.auto?'active':''}" onclick="setAuto(0)">Manual (alguien opera)</button>`;
 }
 function setQPR(n){cfg.qPerRound=n;renderSetup();}
 function setTime(n){cfg.timerSecs=n;renderSetup();}
 function setAdv1(n){cfg.adv1=n; if(cfg.adv2>=n)cfg.adv2=Math.min(cfg.adv2,n-2); renderSetup();}
 function setAdv2(n){cfg.adv2=n;renderSetup();}
+function setAuto(v){cfg.auto=!!v;renderSetup();}
+function renderAvatars(){
+  document.getElementById('avatarPicker').innerHTML=AVATARS.map(a=>
+    `<button class="ava ${a===selectedAvatar?'sel':''}" onclick="pickAvatar('${a}')">${a}</button>`).join('');
+}
+function pickAvatar(a){selectedAvatar=a;renderAvatars();}
+function openJoin(){renderAvatars();show('s-join');}
 function goHostSetup(){renderSetup();show('s-host-setup');}
 
 /* ---------- host: crear sala ---------- */
@@ -410,8 +441,9 @@ function createRoom(){
   const rounds=[pool.slice(0,cfg.qPerRound),pool.slice(cfg.qPerRound,cfg.qPerRound*2),pool.slice(cfg.qPerRound*2,cfg.qPerRound*3)];
   roomRef=db.ref('rooms/'+pin);
   roomRef.set({status:'lobby',round:0,roundCount:3,questionIndex:-1,qPerRound:cfg.qPerRound,
-    timerSecs:cfg.timerSecs,advancers:[cfg.adv1,cfg.adv2],rounds:rounds,currentStartedAt:0,
+    timerSecs:cfg.timerSecs,advancers:[cfg.adv1,cfg.adv2],auto:cfg.auto,rounds:rounds,currentStartedAt:0,
     players:{},answers:{},createdAt:firebase.database.ServerValue.TIMESTAMP});
+  keepAwake();
   document.getElementById('pinShow').textContent=pin;
   document.getElementById('siteHost').textContent=location.host||'el sitio';
   const joinURL=location.origin+location.pathname+'#join='+pin;
@@ -426,10 +458,10 @@ function cancelRoom(){ if(roomRef){roomRef.remove();} cleanup(); show('s-home');
 function listenRoomHost(){
   roomRef.child('players').on('value',s=>{
     const players=s.val()||{};
-    const names=Object.values(players).map(p=>p.name);
-    document.getElementById('lobbyCount').textContent=names.length;
-    document.getElementById('lobbyPlayers').innerHTML=names.map(n=>`<span class="ptag">${esc(n)}</span>`).join('');
-    document.getElementById('startBtn').disabled=names.length<1;
+    const list=Object.values(players);
+    document.getElementById('lobbyCount').textContent=list.length;
+    document.getElementById('lobbyPlayers').innerHTML=list.map(p=>`<span class="ptag">${p.avatar||'🙂'} ${esc(p.name)}</span>`).join('');
+    document.getElementById('startBtn').disabled=list.length<1;
   });
   roomRef.child('answers').on('value',s=>{
     if(lastStatus!=='question'||!lastKey)return;
@@ -446,7 +478,29 @@ function listenRoomHost(){
 }
 function hostStart(){ roomRef.update({round:0,questionIndex:0,status:'question',currentStartedAt:firebase.database.ServerValue.TIMESTAMP}); }
 function hostReveal(){ clearTimeout(hostTimer); if(lastStatus==='question') roomRef.update({status:'reveal'}); }
+function isRankBeat(r){ const lastOfRound=(r.questionIndex+1>=r.qPerRound); return ((r.questionIndex+1)%RANK_EVERY===0) && !lastOfRound; }
+function answerStats(r){
+  const key=r.round+'-'+r.questionIndex; const ans=(r.answers&&r.answers[key])||{};
+  const arr=Object.values(ans);
+  return {correct:arr.filter(a=>a.correct).length, answered:arr.length};
+}
+
+/* auto-avance: cuenta regresiva visible y dispara fn al llegar a 0 */
+function clearAuto(){ clearTimeout(autoTimer); autoTimer=null; clearInterval(autoTick); autoTick=null; }
+function scheduleAuto(secs,fn,elId){
+  clearAuto();
+  let left=secs; const el=document.getElementById(elId);
+  const draw=()=>{ if(el) el.textContent='Siguiente en '+left+' s…'; };
+  draw();
+  autoTick=setInterval(()=>{ left--; if(left<0)left=0; draw(); },1000);
+  autoTimer=setTimeout(()=>{ clearAuto(); if(el)el.textContent=''; fn(); },secs*1000);
+}
+async function keepAwake(){ try{ if('wakeLock' in navigator){ wakeLock=await navigator.wakeLock.request('screen'); } }catch(e){} }
+function releaseAwake(){ try{ if(wakeLock){ wakeLock.release(); wakeLock=null; } }catch(e){} }
+document.addEventListener('visibilitychange',()=>{ if(role==='host' && !wakeLock && document.visibilityState==='visible') keepAwake(); });
+
 function hostNext(){
+  clearAuto();
   roomRef.once('value',s=>{
     const r=s.val(); const next=r.questionIndex+1;
     if(next<r.qPerRound){
@@ -459,6 +513,7 @@ function hostNext(){
   });
 }
 function hostStartNextRound(){
+  clearAuto();
   roomRef.once('value',s=>{
     const r=s.val();
     roomRef.update({round:r.round+1,questionIndex:0,status:'question',currentStartedAt:firebase.database.ServerValue.TIMESTAMP});
@@ -488,6 +543,7 @@ function finalize(r){
 function renderHostByStatus(r){
   lastStatus=r.status; lastKey=r.round+'-'+r.questionIndex;
   if(r.status==='question'){
+    clearAuto();
     const q=r.rounds[r.round][r.questionIndex]; const c=CATS[q.cat];
     document.getElementById('hCat').textContent=c.name; document.getElementById('hCat').style.background=c.color;
     document.getElementById('hQNum').textContent=`${ROUND_NAMES[r.round]} · Pregunta ${r.questionIndex+1}/${r.qPerRound}`;
@@ -501,12 +557,23 @@ function renderHostByStatus(r){
     show('s-host-question');
   }else if(r.status==='reveal'){
     clearTimeout(hostTimer); stopRing();
-    document.getElementById('hRevealKick').textContent=`${ROUND_NAMES[r.round]} · posiciones`;
-    renderLeaderboard(r,'hLeaderboard',false);
+    const q=r.rounds[r.round][r.questionIndex];
+    const st=answerStats(r);
+    document.getElementById('hCorrect').innerHTML=`Respuesta correcta: <b>${esc(q.options[q.correct])}</b><br>${st.correct} la acertaron${st.answered?` · ${st.answered} respondieron`:''}`;
+    const rankBeat=isRankBeat(r);
+    if(rankBeat){
+      document.getElementById('hRevealKick').textContent=`Ranking provisorio · ${ROUND_NAMES[r.round]}`;
+      renderLeaderboard(r,'hLeaderboard',false);
+    }else{
+      document.getElementById('hRevealKick').textContent='Respuesta';
+      document.getElementById('hLeaderboard').innerHTML='';
+    }
     const lastOfRound=(r.questionIndex+1>=r.qPerRound);
     document.getElementById('hNextBtn').textContent = lastOfRound
       ? (r.round+1<r.roundCount?'Cerrar la fase':'Ver campeón')
       : 'Siguiente pregunta';
+    document.getElementById('hNextCountdown').textContent='';
+    if(r.auto) scheduleAuto(rankBeat?RANK_PAUSE:REVEAL_PAUSE,hostNext,'hNextCountdown');
     show('s-host-reveal');
   }else if(r.status==='roundend'){
     clearTimeout(hostTimer);
@@ -517,9 +584,11 @@ function renderHostByStatus(r){
     document.getElementById('hReSub').textContent=`Siguen en carrera ${active} jugadores · ${ROUND_NAMES[r.round+1]} a continuación`;
     renderClassification(r,cap);
     document.getElementById('hRoundBtn').textContent=`Empezar ${ROUND_NAMES[r.round+1]}`;
+    document.getElementById('hRoundCountdown').textContent='';
+    if(r.auto) scheduleAuto(ROUND_PAUSE,hostStartNextRound,'hRoundCountdown');
     show('s-host-roundend');
   }else if(r.status==='ended'){
-    clearTimeout(hostTimer); renderLeaderboard(r,'hFinal',true); show('s-host-final');
+    clearTimeout(hostTimer); clearAuto(); releaseAwake(); renderLeaderboard(r,'hFinal',true); show('s-host-final');
   }
 }
 function renderLeaderboard(r,elId,final){
@@ -530,7 +599,7 @@ function renderLeaderboard(r,elId,final){
   const top=arr[0]?arr[0].score||0:0;
   document.getElementById(elId).innerHTML=arr.slice(0,final?20:10).map((p,i)=>`
     <div class="lb-row ${final&&i===0&&top>0?'win':''}">
-      <span class="pos">${i+1}</span><span class="nm">${esc(p.name)}</span><span class="pt">${p.score||0}</span>
+      <span class="pos">${i+1}</span><span class="av">${p.avatar||'🙂'}</span><span class="nm">${esc(p.name)}</span><span class="pt">${p.score||0}</span>
     </div>`).join('') || '<p class="hint" style="text-align:center">Sin jugadores</p>';
 }
 /* tabla del corte: top cap resaltado, el resto en gris (eliminados) */
@@ -539,7 +608,7 @@ function renderClassification(r,cap){
   document.getElementById('hRoundLb').innerHTML=arr.slice(0,Math.max(cap+5,12)).map((p,i)=>{
     const out=p.eliminated;
     return `<div class="lb-row" style="${out?'opacity:.45;':'border-color:var(--good);'}">
-      <span class="pos">${i+1}</span><span class="nm">${esc(p.name)} ${out?'· eliminado':'· ✅'}</span><span class="pt">${p.score||0}</span>
+      <span class="pos">${i+1}</span><span class="av">${p.avatar||'🙂'}</span><span class="nm">${esc(p.name)} ${out?'· eliminado':'· ✅'}</span><span class="pt">${p.score||0}</span>
     </div>`;
   }).join('');
 }
@@ -558,9 +627,9 @@ function joinRoom(){
     if(r.status!=='lobby'){err.textContent='Esa partida ya empezó.';err.style.display='block';return;}
     pin=p; role='player'; playerName=nm; roomRef=db.ref('rooms/'+pin);
     const pref=roomRef.child('players').push();
-    playerId=pref.key; pref.set({name:nm,score:0,eliminated:false});
+    playerId=pref.key; pref.set({name:nm,score:0,eliminated:false,avatar:selectedAvatar});
     pref.onDisconnect().remove();
-    document.getElementById('pName').textContent=nm;
+    document.getElementById('pName').textContent=selectedAvatar+' '+nm;
     listenRoomPlayer(); show('s-player-lobby');
   });
 }
@@ -572,7 +641,7 @@ function renderPlayerByStatus(r){
   if(r.status==='question'){
     if(me.eliminated){ showSpectator(r,me); return; }
     const key=r.round+'-'+r.questionIndex;
-    if(lastKey!==key){ myAnswered=false; lastKey=key; }
+    if(lastKey!==key){ myAnswered=false; myResult=null; lastKey=key; }
     if(myAnswered){ show('s-player-wait'); return; }
     const q=r.rounds[r.round][r.questionIndex]; const c=CATS[q.cat];
     document.getElementById('pCat').textContent=c.name; document.getElementById('pCat').style.background=c.color;
@@ -584,7 +653,8 @@ function renderPlayerByStatus(r){
   }else if(r.status==='reveal'){
     stopRing();
     if(me.eliminated){ showSpectator(r,me); return; }
-    showPlayerFeedback(r); show('s-player-wait');
+    if(isRankBeat(r)){ showPlayerRank(r,me); show('s-player-rank'); }
+    else { showPlayerFeedback(r); show('s-player-wait'); }
   }else if(r.status==='roundend'){
     stopRing(); showRoundEndPlayer(r,me);
   }else if(r.status==='ended'){
@@ -603,6 +673,19 @@ function showRoundEndPlayer(r,me){
   document.getElementById('pFeedback').innerHTML=`<div class="face">🎉</div><div class="msg" style="color:var(--good)">¡Clasificaste!</div><p class="tagline">Pasás a ${ROUND_NAMES[r.round+1]}. Llevás ${me.score||0} puntos.</p>`;
   show('s-player-wait');
 }
+function showPlayerRank(r,me){
+  const arr=Object.entries(r.players||{}).map(([id,p])=>({id,...p})).filter(p=>!p.eliminated)
+              .sort((a,b)=>(b.score||0)-(a.score||0));
+  const pos=arr.findIndex(p=>p.id===playerId)+1;
+  const res=myResult;
+  let head='';
+  if(res){ head=(res.correct?`✅ +${res.points}`:'❌ +0')+' · '; }
+  document.getElementById('pRankMe').textContent=`${head}vas ${pos||'-'}º`;
+  document.getElementById('pRankLb').innerHTML=arr.slice(0,10).map((p,i)=>`
+    <div class="lb-row ${p.id===playerId?'me':''}">
+      <span class="pos">${i+1}</span><span class="av">${p.avatar||'🙂'}</span><span class="nm">${esc(p.name)}</span><span class="pt">${p.score||0}</span>
+    </div>`).join('');
+}
 function playerAnswer(choice){
   if(myAnswered)return; myAnswered=true;
   roomRef.once('value',s=>{
@@ -613,19 +696,18 @@ function playerAnswer(choice){
     const points=correct?Math.round(600+400*(remaining/total)):0;
     roomRef.child('answers/'+key+'/'+playerId).set({choice,correct,points});
     if(points>0) roomRef.child('players/'+playerId+'/score').transaction(v=>(v||0)+points);
-    window._lastResult={correct,points};
+    myResult={correct,points};
     document.getElementById('pFeedback').className='feedback center';
     document.getElementById('pFeedback').innerHTML=`<div class="big" style="font-family:'Anton',sans-serif;font-size:36px;text-transform:uppercase">¡Enviada!</div><p class="tagline">Esperá el resultado en la pantalla…</p>`;
     show('s-player-wait');
   });
 }
 function showPlayerFeedback(r){
-  const res=window._lastResult;
+  const res=myResult;
   const fb=document.getElementById('pFeedback');
   if(!res){ fb.className='feedback center bad'; fb.innerHTML=`<div class="face">⏱️</div><div class="msg">¡Sin respuesta!</div>`; return; }
   if(res.correct){ fb.className='feedback center'; fb.innerHTML=`<div class="face">✅</div><div class="msg" style="color:var(--good)">¡Correcto!</div><div class="pts">+${res.points} puntos</div>`; }
   else { fb.className='feedback center bad'; fb.innerHTML=`<div class="face">❌</div><div class="msg">¡Erraste!</div><p class="tagline">A la próxima la pegás</p>`; }
-  window._lastResult=null;
 }
 function showPlayerFinal(r,me){
   const pos=me.finalPos||0;
@@ -653,13 +735,13 @@ function stopRing(){ if(ringTimer){clearInterval(ringTimer);ringTimer=null;} }
 
 /* ---------- utils ---------- */
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function cleanup(){ if(roomRef){roomRef.off();} clearTimeout(hostTimer); stopRing(); pin=null;roomRef=null;role=null;playerId=null;myAnswered=false;lastStatus=null;lastKey=null; }
+function cleanup(){ if(roomRef){roomRef.off();} clearTimeout(hostTimer); clearAuto(); releaseAwake(); stopRing(); pin=null;roomRef=null;role=null;playerId=null;myAnswered=false;lastStatus=null;lastKey=null; }
 function resetAll(){ if(role==='player'&&roomRef&&playerId){roomRef.child('players/'+playerId).remove();} if(role==='host'&&roomRef){roomRef.remove();} cleanup(); show('s-home'); }
 
 /* deep link join via QR (#join=PIN) */
 (function(){
   const m=location.hash.match(/join=([A-Za-z0-9]{4})/);
-  if(m){ document.getElementById('pinInput').value=m[1].toUpperCase(); show('s-join'); setTimeout(()=>document.getElementById('nameInput').focus(),200); }
+  if(m){ document.getElementById('pinInput').value=m[1].toUpperCase(); renderAvatars(); show('s-join'); setTimeout(()=>document.getElementById('nameInput').focus(),200); }
 })();
 </script>
 </body>
