@@ -62,6 +62,17 @@
   .ptag{background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:8px 15px;font-weight:700;font-size:15px;box-shadow:var(--shadow-sm);animation:pop .25s ease}
   @keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
   .count-pill{font-weight:800;color:var(--celeste-deep)}
+  @keyframes rowIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .lb-row.rin{animation:rowIn .45s ease both}
+  .suspense{text-align:center;padding:26px 0}
+  .suspense .drum{font-size:54px;display:inline-block;animation:wob .5s ease-in-out infinite}
+  @keyframes wob{0%,100%{transform:rotate(-11deg)}50%{transform:rotate(11deg)}}
+  .suspense .txt{font-family:'Anton',sans-serif;font-size:24px;text-transform:uppercase;color:var(--muted);margin-top:10px;letter-spacing:.04em}
+  .bignum{font-family:'Anton',sans-serif;font-size:clamp(48px,15vw,92px);line-height:1;display:inline-block;animation:popbig .55s cubic-bezier(.2,1.5,.4,1) both}
+  @keyframes popbig{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
+  .lb-row.pod-hide{opacity:0;visibility:hidden}
+  .lb-row.pod-in{animation:popbig .5s cubic-bezier(.2,1.4,.4,1) both}
+  .lb-row.top1{box-shadow:0 0 0 3px var(--sun),0 6px 20px rgba(224,169,31,.4)}
 
   /* question */
   .qtop{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
@@ -99,11 +110,14 @@
   .feedback.bad .msg{color:var(--bad)}
 
   .config-warn{background:var(--bad-bg);border:1.5px solid var(--bad);color:#8a211d;border-radius:14px;padding:14px 16px;font-size:14px;margin-bottom:16px;line-height:1.5}
-  .avatars{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
-  .ava{font-size:24px;line-height:1;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 0;cursor:pointer;text-align:center;transition:transform .08s,border-color .12s}
+  .avatars{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+  .ava{background:#fff;border:2px solid var(--line);border-radius:14px;padding:5px;cursor:pointer;transition:transform .08s,border-color .12s;line-height:0}
+  .ava svg{width:100%;height:auto;display:block;border-radius:10px}
   .ava:active{transform:scale(.94)}
   .ava.sel{border-color:var(--celeste-deep);background:#eef6fc;transform:scale(1.05)}
-  .lb-row .av{font-size:20px;flex:0 0 auto}
+  .avb{display:inline-block;vertical-align:middle;border-radius:8px;overflow:hidden;line-height:0}
+  .avb svg{display:block;width:100%;height:100%}
+  .lb-row .av{flex:0 0 auto;line-height:0}
   .correct-banner{background:var(--good-bg);border:1.5px solid var(--good);color:#0d5e34;border-radius:14px;padding:13px 16px;text-align:center;font-weight:700;margin-bottom:14px;line-height:1.4}
   .correct-banner b{font-weight:800}
   code{background:#eef3f8;padding:2px 6px;border-radius:6px;font-size:13px}
@@ -299,7 +313,7 @@ const CATS={historia:{name:'Historia',color:'#C0392B'},geografia:{name:'Geograf�
 const QUESTIONS=[
   {cat:'historia',q:'¿Quién fundó por primera vez Buenos Aires, en 1536?',options:['Pedro de Mendoza','Juan de Garay','Hernandarias','Sebastián Gaboto'],correct:0},
   {cat:'historia',q:'¿Quién realizó la segunda y definitiva fundación de Buenos Aires en 1580?',options:['Juan de Garay','Pedro de Mendoza','Cabeza de Vaca','Diego de Rojas'],correct:0},
-  {cat:'historia',q:'¿Qué se conmemora el 25 de mayo de 1810?',options:['La Revolución de Mayo','La Independencia','La Constitución','La batalla de San Lorenzo'],correct:0},
+  {cat:'historia',q:'¿Quién presidió la Primera Junta de Gobierno de 1810?',options:['Cornelio Saavedra','Mariano Moreno','Manuel Belgrano','Juan José Castelli'],correct:0},
   {cat:'historia',q:'¿En qué ciudad se declaró la Independencia en 1816?',options:['San Miguel de Tucumán','Buenos Aires','Córdoba','Salta'],correct:0},
   {cat:'historia',q:'¿Quién cruzó los Andes para liberar Chile y Perú?',options:['José de San Martín','Manuel Belgrano','Martín Güemes','Bernardino Rivadavia'],correct:0},
   {cat:'historia',q:'¿Quién creó la bandera argentina?',options:['Manuel Belgrano','José de San Martín','Mariano Moreno','Cornelio Saavedra'],correct:0},
@@ -318,7 +332,7 @@ const QUESTIONS=[
   {cat:'historia',q:'¿Qué guerra enfrentó a Argentina y el Reino Unido en 1982?',options:['La Guerra de Malvinas','La Guerra del Paraguay','La Guerra del Chaco','La Guerra de la Triple Alianza'],correct:0},
   {cat:'historia',q:'¿Qué caudillo defendió el norte con la "guerra gaucha" frente a los realistas?',options:['Martín Miguel de Güemes','José de San Martín','Manuel Belgrano','Manuel Dorrego'],correct:0},
   {cat:'geografia',q:'¿Cuál es el pico más alto de América?',options:['El Aconcagua','El Tupungato','El Mercedario','El Lanín'],correct:0},
-  {cat:'geografia',q:'¿En qué provincia está el Aconcagua?',options:['Mendoza','San Juan','Salta','Neuquén'],correct:0},
+  {cat:'geografia',q:'¿En qué provincia está el Parque Nacional Talampaya, con sus cañones rojos?',options:['La Rioja','San Juan','Catamarca','Mendoza'],correct:0},
   {cat:'geografia',q:'¿En qué provincia están las Cataratas del Iguazú?',options:['Misiones','Corrientes','Formosa','Chaco'],correct:0},
   {cat:'geografia',q:'¿Cómo se llama el glaciar más famoso, en Santa Cruz?',options:['Perito Moreno','Upsala','Viedma','Spegazzini'],correct:0},
   {cat:'geografia',q:'¿Cuántas provincias tiene Argentina (sin contar la Ciudad de Buenos Aires)?',options:['23','22','24','25'],correct:0},
@@ -331,7 +345,7 @@ const QUESTIONS=[
   {cat:'geografia',q:'¿En qué provincia está la Península Valdés, famosa por las ballenas?',options:['Chubut','Santa Cruz','Río Negro','Buenos Aires'],correct:0},
   {cat:'geografia',q:'¿Cuál es la capital de Tierra del Fuego?',options:['Ushuaia','Río Grande','Tolhuin','Rawson'],correct:0},
   {cat:'geografia',q:'¿Cuál es el lago de mayor superficie del país?',options:['Lago Argentino','Nahuel Huapi','Lago Viedma','Lago Musters'],correct:0},
-  {cat:'geografia',q:'¿Qué cordillera atraviesa todo el oeste argentino?',options:['Los Andes','Sierra de la Ventana','Sierras de Córdoba','Sierras Subandinas'],correct:0},
+  {cat:'geografia',q:'¿Cuál es el volcán más alto del mundo, en el límite con Chile?',options:['Ojos del Salado','Lanín','Tupungato','Domuyo'],correct:0},
   {cat:'geografia',q:'¿Con cuál de estos países NO limita Argentina?',options:['Perú','Chile','Bolivia','Brasil'],correct:0},
   {cat:'geografia',q:'¿Cuál es la provincia más extensa del país?',options:['Buenos Aires','Santa Cruz','Chubut','Río Negro'],correct:0},
   {cat:'geografia',q:'¿En qué región se encuentran las Salinas Grandes?',options:['El Noroeste (Jujuy y Salta)','La Patagonia','El Litoral','La región pampeana'],correct:0},
@@ -347,21 +361,21 @@ const QUESTIONS=[
   {cat:'cultura',q:'¿A qué músico le dicen "el Flaco"?',options:['Luis Alberto Spinetta','Charly García','Fito Páez','Andrés Calamaro'],correct:0},
   {cat:'cultura',q:'¿Quién compuso "Libertango" y renovó el tango?',options:['Astor Piazzolla','Carlos Gardel','Osvaldo Pugliese','Aníbal Troilo'],correct:0},
   {cat:'cultura',q:'¿Qué cantante de tango murió en un accidente aéreo en Medellín en 1935?',options:['Carlos Gardel','Julio Sosa','Edmundo Rivero','Hugo del Carril'],correct:0},
-  {cat:'cultura',q:'¿Qué infusión se toma con bombilla?',options:['El mate','El té','El café','El mate cocido'],correct:0},
-  {cat:'cultura',q:'¿Qué dulce a base de leche es un emblema nacional?',options:['El dulce de leche','El dulce de membrillo','El dulce de batata','El cayote'],correct:0},
+  {cat:'cultura',q:'¿Qué provincia produce la mayor parte de la yerba mate del país?',options:['Misiones','Corrientes','Tucumán','Salta'],correct:0},
+  {cat:'cultura',q:'¿Quién escribió "Martín Fierro", cumbre de la literatura gauchesca?',options:['José Hernández','Ricardo Güiraldes','Leopoldo Lugones','Domingo F. Sarmiento'],correct:0},
   {cat:'cultura',q:'¿Con qué banda debutó Charly García junto a Nito Mestre?',options:['Sui Generis','Serú Girán','Almendra','La Máquina de Hacer Pájaros'],correct:0},
   {cat:'cultura',q:'¿A qué cantante de cuarteto cordobés le dicen "La Mona"?',options:['Carlos Jiménez','Rodrigo','Damián Córdoba','Walter Olmos'],correct:0},
   {cat:'cultura',q:'¿Quién es el autor de la historieta "El Eternauta"?',options:['Héctor Germán Oesterheld','Quino','Alberto Breccia','Roberto Fontanarrosa'],correct:0},
   {cat:'cultura',q:'¿Qué cuartetero, apodado "El Potro", falleció en el año 2000?',options:['Rodrigo Bueno','La Mona Jiménez','Walter Olmos','Sebastián'],correct:0},
   {cat:'cultura',q:'¿Qué banda lideró el Indio Solari y marcó el rock de los 90?',options:['Los Redondos','Soda Stereo','Sumo','Bersuit Vergarabat'],correct:0},
-  {cat:'cultura',q:'¿Qué conductora es famosa por sus "almuerzos" en la televisión?',options:['Mirtha Legrand','Susana Giménez','Moria Casán','Juana Viale'],correct:0},
+  {cat:'cultura',q:'¿Qué conductora creó y popularizó los "almuerzos" televisivos?',options:['Mirtha Legrand','Susana Giménez','Moria Casán','Juana Viale'],correct:0},
   {cat:'cultura',q:'¿Qué película de Damián Szifrón (2014) fue nominada al Oscar?',options:['Relatos salvajes','El secreto de sus ojos','Nueve reinas','El clan'],correct:0},
   {cat:'cultura',q:'¿Qué bebida amarga, mezclada con cola, es típica especialmente en Córdoba?',options:['El fernet','El vermut','El gancia','La hesperidina'],correct:0},
-  {cat:'deporte',q:'¿En qué año ganó Argentina el Mundial de Qatar?',options:['2022','2018','2014','2010'],correct:0},
+  {cat:'deporte',q:'¿A qué selección venció Argentina en la final del Mundial de Qatar 2022?',options:['Francia','Brasil','Croacia','Países Bajos'],correct:0},
   {cat:'deporte',q:'¿Cuántos Mundiales de fútbol ganó Argentina?',options:['Tres','Dos','Cuatro','Uno'],correct:0},
   {cat:'deporte',q:'¿En qué país se jugó el Mundial 1978 que ganó Argentina?',options:['Argentina','España','México','Alemania'],correct:0},
   {cat:'deporte',q:'¿Cómo se apoda a la selección femenina de hockey sobre césped?',options:['Las Leonas','Las Pumas','Las Águilas','Las Garzas'],correct:0},
-  {cat:'deporte',q:'¿Cómo se llama la selección masculina de rugby?',options:['Los Pumas','Los Cóndores','Los Teros','Los Jaguares'],correct:0},
+  {cat:'deporte',q:'¿A qué selección anfitriona venció Los Pumas en el Mundial de rugby 2007?',options:['Francia','Inglaterra','Sudáfrica','Nueva Zelanda'],correct:0},
   {cat:'deporte',q:'¿Quién hizo "la mano de Dios" y "el gol del siglo" en 1986?',options:['Diego Maradona','Mario Kempes','Gabriel Batistuta','Lionel Messi'],correct:0},
   {cat:'deporte',q:'¿Qué automovilista argentino ganó cinco títulos de Fórmula 1?',options:['Juan Manuel Fangio','Carlos Reutemann','Froilán González','Oscar Gálvez'],correct:0},
   {cat:'deporte',q:'¿En qué Juegos Olímpicos ganó el oro la "Generación Dorada" del básquet?',options:['Atenas 2004','Sídney 2000','Beijing 2008','Londres 2012'],correct:0},
@@ -371,13 +385,38 @@ const QUESTIONS=[
   {cat:'deporte',q:'¿En qué club europeo debutó como profesional Lionel Messi?',options:['FC Barcelona','Real Madrid','PSG','Manchester City'],correct:0},
   {cat:'deporte',q:'¿En qué club argentino debutó futbolísticamente Diego Maradona?',options:['Argentinos Juniors','Boca Juniors','River Plate','Independiente'],correct:0},
   {cat:'deporte',q:'¿Qué delantero, "el Matador", fue máximo goleador histórico de la selección antes de Messi?',options:['Gabriel Batistuta','Mario Kempes','Hernán Crespo','Gonzalo Higuaín'],correct:0},
-  {cat:'deporte',q:'¿Qué tenista argentino fue número 1 mundial y figura de los años 70 y 80?',options:['Guillermo Vilas','José Luis Clerc','David Nalbandian','Juan Martín del Potro'],correct:0},
+  {cat:'deporte',q:'¿Qué tenista argentino ganó Roland Garros y el US Open en 1977?',options:['Guillermo Vilas','José Luis Clerc','David Nalbandian','Juan Martín del Potro'],correct:0},
   {cat:'deporte',q:'¿En qué deporte se destacó Luciana Aymar, ocho veces mejor del mundo?',options:['Hockey sobre césped','Tenis','Vóley','Natación'],correct:0},
   {cat:'deporte',q:'¿Qué boxeador santafesino fue campeón mundial de peso mediano en los años 70?',options:['Carlos Monzón','Nicolino Locche','Pascual Pérez','Oscar Bonavena'],correct:0},
   {cat:'deporte',q:'¿En qué deporte fueron campeones mundiales "Los Murciélagos"?',options:['Fútbol para ciegos','Vóley','Handball','Básquet'],correct:0},
   {cat:'deporte',q:'¿Qué mediocampista de Boca, apodado "Román", usó la camiseta número 10?',options:['Juan Román Riquelme','Juan Sebastián Verón','Pablo Aimar',"Andrés D'Alessandro"],correct:0},
-  {cat:'deporte',q:'¿Quién atajó el penal decisivo en la tanda de la final del Mundial 2022?',options:['Emiliano "Dibu" Martínez','Sergio Romero','Mariano Andújar','Franco Armani'],correct:0},
+  {cat:'deporte',q:'¿Qué arquero fue figura en la tanda de penales de la final del Mundial 2022?',options:['Emiliano "Dibu" Martínez','Sergio Romero','Mariano Andújar','Franco Armani'],correct:0},
+  {cat:'historia',q:'¿Qué virrey gobernaba el Río de la Plata durante la primera Invasión Inglesa de 1806?',options:['Rafael de Sobremonte','Santiago de Liniers','Baltasar Hidalgo de Cisneros','Martín de Álzaga'],correct:0},
+  {cat:'historia',q:'¿Quién encabezó la Reconquista de Buenos Aires en 1806?',options:['Santiago de Liniers','Rafael de Sobremonte','Cornelio Saavedra','Juan Martín de Pueyrredón'],correct:0},
+  {cat:'historia',q:'¿En qué combate de 1813 tuvo su bautismo de fuego San Martín con los Granaderos a Caballo?',options:['San Lorenzo','Tucumán','Salta','Maipú'],correct:0},
+  {cat:'historia',q:'¿Qué se recuerda el 17 de octubre de 1945, fecha clave del peronismo?',options:['El Día de la Lealtad (movilización por Perón)','La Revolución Libertadora','La nacionalización de los ferrocarriles','El primer triunfo electoral de Perón'],correct:0},
+  {cat:'geografia',q:'¿Qué río forma buena parte del límite entre Argentina y Uruguay?',options:['Río Uruguay','Río Paraná','Río Pilcomayo','Río Bermejo'],correct:0},
+  {cat:'geografia',q:'¿En qué provincia está el Parque Nacional Los Glaciares?',options:['Santa Cruz','Chubut','Río Negro','Tierra del Fuego'],correct:0},
+  {cat:'geografia',q:'¿En qué provincia está el Valle de la Luna (Ischigualasto)?',options:['San Juan','La Rioja','Mendoza','Catamarca'],correct:0},
+  {cat:'geografia',q:'¿En qué provincia están las Termas de Río Hondo?',options:['Santiago del Estero','Tucumán','Catamarca','Salta'],correct:0},
+  {cat:'cultura',q:'¿Quién escribió "Don Segundo Sombra", clásico de la literatura gauchesca?',options:['Ricardo Güiraldes','José Hernández','Leopoldo Lugones','Benito Lynch'],correct:0},
+  {cat:'cultura',q:'¿Qué banda de rock, con Ricardo Mollo en voz, surgió tras la disolución de Sumo?',options:['Divididos','Las Pelotas','Los Piojos','Caballeros de la Quema'],correct:0},
+  {cat:'cultura',q:'¿Qué pintor argentino es célebre por sus coloridos paisajes del puerto de La Boca?',options:['Benito Quinquela Martín','Antonio Berni','Xul Solar','Raúl Soldi'],correct:0},
+  {cat:'cultura',q:'¿Quién dirigió la película "Nueve reinas" (2000)?',options:['Fabián Bielinsky','Juan José Campanella','Damián Szifrón','Lucrecia Martel'],correct:0},
+  {cat:'deporte',q:'¿En qué estadio se jugó la final del Mundial 2022 que ganó Argentina?',options:['Estadio de Lusail','Estadio 974','Al Bayt','Khalifa Internacional'],correct:0},
+  {cat:'deporte',q:'¿Qué equipo argentino le ganó a Boca la final de la Copa Libertadores 2018 en Madrid?',options:['River Plate','Racing Club','Independiente','San Lorenzo'],correct:0},
+  {cat:'deporte',q:'¿Qué torneo de Grand Slam ganó Gabriela Sabatini en 1990?',options:['US Open','Roland Garros','Wimbledon','Abierto de Australia'],correct:0},
 ];
+/* dificultad por pregunta, en el mismo orden: 1=fácil 2=media 3=difícil */
+const DIFF=[
+  2,2,2,1,1,1,2,2,3,2,3,1,2,2,2,2,1,1,1,2,
+  1,3,1,1,2,2,2,1,1,1,2,2,2,3,3,2,3,2,2,1,
+  1,2,1,1,2,2,3,2,2,2,3,2,3,2,3,2,2,1,2,1,
+  1,1,2,1,3,1,2,2,2,3,3,1,3,2,3,2,3,3,2,1,
+  3,2,2,2,2,2,3,3,3,3,3,3,3,2,3
+];
+QUESTIONS.forEach((q,i)=>{ q.d=DIFF[i]||2; });
+const DIFF_LABEL={1:'Fácil',2:'Media',3:'Difícil'};
 
 /* ---------- estado / firebase ---------- */
 let db=null, fbReady=false;
@@ -387,10 +426,38 @@ let playerId=null, playerName=null, myAnswered=false, myResult=null;
 let hostTimer=null, ringTimer=null, autoTimer=null, autoTick=null, wakeLock=null;
 let lastStatus=null, lastKey=null;
 const REVEAL_PAUSE=5, RANK_PAUSE=8, ROUND_PAUSE=12, RANK_EVERY=3;
-const AVATARS=['⚽','🧉','🥩','🦊','🐆','🦁','🐶','🦅','🐺','🍷','🎸','🏆','🦩','🐲','😎','🐢'];
-let selectedAvatar=AVATARS[Math.floor(Math.random()*AVATARS.length)];
+const AV_BG=['#E94B3C','#2E6FB7','#F2A03D','#39A06B','#B5489A','#16A0A0','#E0653A','#7A57D1','#4A93C9'];
+const AV_SKIN=['#FFD9A0','#F7C59F','#FFE0B2','#FCD5CE','#FFF3B0','#FBD0B9'];
+const AV_COUNT=18;
+function avatarSVG(seed){
+  seed=Math.abs(seed|0);
+  const bg=AV_BG[seed%AV_BG.length];
+  const skin=AV_SKIN[Math.floor(seed/AV_BG.length)%AV_SKIN.length];
+  const acc=AV_BG[(seed+4)%AV_BG.length];
+  const eyeT=seed%3, mouthT=Math.floor(seed/3)%3, accT=Math.floor(seed/9)%4;
+  let eyes;
+  if(eyeT===0) eyes='<circle cx="40" cy="50" r="4.6" fill="#222"/><circle cx="60" cy="50" r="4.6" fill="#222"/>';
+  else if(eyeT===1) eyes='<circle cx="40" cy="50" r="6" fill="#fff"/><circle cx="41.5" cy="51" r="2.8" fill="#222"/><circle cx="60" cy="50" r="6" fill="#fff"/><circle cx="61.5" cy="51" r="2.8" fill="#222"/>';
+  else eyes='<path d="M35 51 q5 -6 10 0" stroke="#222" stroke-width="3.4" fill="none" stroke-linecap="round"/><path d="M55 51 q5 -6 10 0" stroke="#222" stroke-width="3.4" fill="none" stroke-linecap="round"/>';
+  let mouth;
+  if(mouthT===0) mouth='<path d="M40 64 q10 11 20 0" stroke="#222" stroke-width="3.4" fill="none" stroke-linecap="round"/>';
+  else if(mouthT===1) mouth='<circle cx="50" cy="66" r="4.6" fill="#222"/>';
+  else mouth='<path d="M41 64 q9 12 18 0 z" fill="#C0392B"/>';
+  let a='';
+  if(accT===1) a=`<path d="M30 34 a20 20 0 0 1 40 0 z" fill="${acc}"/>`;
+  else if(accT===2) a=`<line x1="50" y1="26" x2="50" y2="13" stroke="${acc}" stroke-width="3"/><circle cx="50" cy="11" r="4.5" fill="${acc}"/>`;
+  else if(accT===3) a=`<path d="M50 27 l-11 -6 v12 z" fill="${acc}"/><path d="M50 27 l11 -6 v12 z" fill="${acc}"/><circle cx="50" cy="27" r="3" fill="${acc}"/>`;
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="24" fill="${bg}"/><circle cx="50" cy="54" r="30" fill="${skin}"/><circle cx="38" cy="63" r="3.8" fill="#ffffff55"/><circle cx="62" cy="63" r="3.8" fill="#ffffff55"/>${eyes}${mouth}${a}</svg>`;
+}
+function avHTML(seed,px){ px=px||28; return `<span class="avb" style="width:${px}px;height:${px}px">${avatarSVG(seed)}</span>`; }
+let selectedAvatar=Math.floor(Math.random()*AV_COUNT);
 const ROUND_NAMES=['Fase 1','Fase 2','Fase final'];
 const SHAPES=['▲','◆','●','■'];
+let suspenseT=null, revealKey=null, playerRevealKey=null;
+const SUSPENSE_HTML='<div class="suspense"><span class="drum">🥁</span><div class="txt">Redoble… calculando posiciones</div></div>';
+function clearSuspense(){ if(suspenseT){clearTimeout(suspenseT);suspenseT=null;} }
+function saveSession(){ try{ localStorage.setItem('argentrivia_session',JSON.stringify({pin,playerId,name:playerName,avatar:selectedAvatar})); }catch(e){} }
+function clearSession(){ try{ localStorage.removeItem('argentrivia_session'); }catch(e){} }
 
 (function initFirebase(){
   try{
@@ -423,22 +490,44 @@ function setAdv1(n){cfg.adv1=n; if(cfg.adv2>=n)cfg.adv2=Math.min(cfg.adv2,n-2); 
 function setAdv2(n){cfg.adv2=n;renderSetup();}
 function setAuto(v){cfg.auto=!!v;renderSetup();}
 function renderAvatars(){
-  document.getElementById('avatarPicker').innerHTML=AVATARS.map(a=>
-    `<button class="ava ${a===selectedAvatar?'sel':''}" onclick="pickAvatar('${a}')">${a}</button>`).join('');
+  let h='';
+  for(let i=0;i<AV_COUNT;i++) h+=`<button class="ava ${i===selectedAvatar?'sel':''}" onclick="pickAvatar(${i})">${avatarSVG(i)}</button>`;
+  document.getElementById('avatarPicker').innerHTML=h;
 }
-function pickAvatar(a){selectedAvatar=a;renderAvatars();}
+function pickAvatar(i){selectedAvatar=i;renderAvatars();}
 function openJoin(){renderAvatars();show('s-join');}
 function goHostSetup(){renderSetup();show('s-host-setup');}
 
 /* ---------- host: crear sala ---------- */
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function shuffleOpts(q){
+  const order=shuffle(q.options.map((_,i)=>i));
+  return {cat:q.cat,q:q.q,d:q.d,options:order.map(i=>q.options[i]),correct:order.indexOf(q.correct)};
+}
+/* arma una fase de n preguntas siguiendo un orden de preferencia de dificultad, sin repetir */
+function drawRound(n,prefs,used){
+  const out=[];
+  for(const d of prefs){
+    for(const q of shuffle(QUESTIONS.filter(x=>x.d===d && !used.has(x)))){
+      if(out.length>=n) break;
+      out.push(q); used.add(q);
+    }
+    if(out.length>=n) break;
+  }
+  if(out.length<n){
+    for(const q of shuffle(QUESTIONS.filter(x=>!used.has(x)))){
+      if(out.length>=n) break; out.push(q); used.add(q);
+    }
+  }
+  return out.map(shuffleOpts);
+}
 function makePin(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
 function createRoom(){
   if(!fbReady)return;
   pin=makePin(); role='host';
-  const need=cfg.qPerRound*3;
-  const pool=shuffle(QUESTIONS).slice(0,Math.min(need,QUESTIONS.length)).map(q=>({cat:q.cat,q:q.q,options:q.options,correct:q.correct}));
-  const rounds=[pool.slice(0,cfg.qPerRound),pool.slice(cfg.qPerRound,cfg.qPerRound*2),pool.slice(cfg.qPerRound*2,cfg.qPerRound*3)];
+  const n=cfg.qPerRound, used=new Set();
+  // Fase 1: fáciles → Fase 2: medias → Fase final: difíciles (con respaldo si falta)
+  const rounds=[ drawRound(n,[1,2,3],used), drawRound(n,[2,1,3],used), drawRound(n,[3,2,1],used) ];
   roomRef=db.ref('rooms/'+pin);
   roomRef.set({status:'lobby',round:0,roundCount:3,questionIndex:-1,qPerRound:cfg.qPerRound,
     timerSecs:cfg.timerSecs,advancers:[cfg.adv1,cfg.adv2],auto:cfg.auto,rounds:rounds,currentStartedAt:0,
@@ -458,9 +547,9 @@ function cancelRoom(){ if(roomRef){roomRef.remove();} cleanup(); show('s-home');
 function listenRoomHost(){
   roomRef.child('players').on('value',s=>{
     const players=s.val()||{};
-    const list=Object.values(players);
+    const list=Object.values(players).filter(p=>p.online!==false);
     document.getElementById('lobbyCount').textContent=list.length;
-    document.getElementById('lobbyPlayers').innerHTML=list.map(p=>`<span class="ptag">${p.avatar||'🙂'} ${esc(p.name)}</span>`).join('');
+    document.getElementById('lobbyPlayers').innerHTML=list.map(p=>`<span class="ptag">${avHTML(p.avatar,22)} ${esc(p.name)}</span>`).join('');
     document.getElementById('startBtn').disabled=list.length<1;
   });
   roomRef.child('answers').on('value',s=>{
@@ -469,7 +558,7 @@ function listenRoomHost(){
     const got=ans[lastKey]?Object.keys(ans[lastKey]).length:0;
     roomRef.child('players').once('value',ps=>{
       const ps_=ps.val()||{};
-      const active=Object.values(ps_).filter(p=>!p.eliminated).length;
+      const active=Object.values(ps_).filter(p=>!p.eliminated && p.online!==false).length;
       document.getElementById('hRespond').textContent=`${got} de ${active} respondieron`;
       if(active>0 && got>=active) hostReveal();
     });
@@ -543,10 +632,10 @@ function finalize(r){
 function renderHostByStatus(r){
   lastStatus=r.status; lastKey=r.round+'-'+r.questionIndex;
   if(r.status==='question'){
-    clearAuto();
+    clearAuto(); clearSuspense(); revealKey=null;
     const q=r.rounds[r.round][r.questionIndex]; const c=CATS[q.cat];
     document.getElementById('hCat').textContent=c.name; document.getElementById('hCat').style.background=c.color;
-    document.getElementById('hQNum').textContent=`${ROUND_NAMES[r.round]} · Pregunta ${r.questionIndex+1}/${r.qPerRound}`;
+    document.getElementById('hQNum').textContent=`${ROUND_NAMES[r.round]} · Pregunta ${r.questionIndex+1}/${r.qPerRound}${q.d?' · '+DIFF_LABEL[q.d]:''}`;
     document.getElementById('hQText').textContent=q.q;
     document.getElementById('hAnswers').innerHTML=q.options.map((o,i)=>`<div class="ans c${i+1}"><span class="shape">${SHAPES[i]}</span><span>${esc(o)}</span></div>`).join('');
     document.getElementById('hRespond').textContent='0 respondieron';
@@ -561,19 +650,25 @@ function renderHostByStatus(r){
     const st=answerStats(r);
     document.getElementById('hCorrect').innerHTML=`Respuesta correcta: <b>${esc(q.options[q.correct])}</b><br>${st.correct} la acertaron${st.answered?` · ${st.answered} respondieron`:''}`;
     const rankBeat=isRankBeat(r);
-    if(rankBeat){
-      document.getElementById('hRevealKick').textContent=`Ranking provisorio · ${ROUND_NAMES[r.round]}`;
-      renderLeaderboard(r,'hLeaderboard',false);
-    }else{
-      document.getElementById('hRevealKick').textContent='Respuesta';
-      document.getElementById('hLeaderboard').innerHTML='';
-    }
     const lastOfRound=(r.questionIndex+1>=r.qPerRound);
     document.getElementById('hNextBtn').textContent = lastOfRound
       ? (r.round+1<r.roundCount?'Cerrar la fase':'Ver campeón')
       : 'Siguiente pregunta';
-    document.getElementById('hNextCountdown').textContent='';
-    if(r.auto) scheduleAuto(rankBeat?RANK_PAUSE:REVEAL_PAUSE,hostNext,'hNextCountdown');
+    const k='rev-'+r.round+'-'+r.questionIndex;
+    if(revealKey!==k){
+      revealKey=k;
+      if(rankBeat){
+        document.getElementById('hRevealKick').textContent=`Ranking provisorio · ${ROUND_NAMES[r.round]}`;
+        document.getElementById('hLeaderboard').innerHTML=SUSPENSE_HTML;
+        clearSuspense();
+        suspenseT=setTimeout(()=>{ suspenseT=null; roomRef.once('value',ss=>{const rr=ss.val();if(rr)renderLeaderboard(rr,'hLeaderboard',false);}); },1200);
+      }else{
+        document.getElementById('hRevealKick').textContent='Respuesta';
+        document.getElementById('hLeaderboard').innerHTML='';
+      }
+      document.getElementById('hNextCountdown').textContent='';
+      if(r.auto) scheduleAuto(rankBeat?RANK_PAUSE:REVEAL_PAUSE,hostNext,'hNextCountdown');
+    }
     show('s-host-reveal');
   }else if(r.status==='roundend'){
     clearTimeout(hostTimer);
@@ -582,36 +677,61 @@ function renderHostByStatus(r){
     document.getElementById('hReTitle').textContent=`Pasan los mejores ${cap}`;
     const active=Object.values(r.players||{}).filter(p=>!p.eliminated).length;
     document.getElementById('hReSub').textContent=`Siguen en carrera ${active} jugadores · ${ROUND_NAMES[r.round+1]} a continuación`;
-    renderClassification(r,cap);
     document.getElementById('hRoundBtn').textContent=`Empezar ${ROUND_NAMES[r.round+1]}`;
-    document.getElementById('hRoundCountdown').textContent='';
-    if(r.auto) scheduleAuto(ROUND_PAUSE,hostStartNextRound,'hRoundCountdown');
+    const k='rnd-'+r.round;
+    if(revealKey!==k){
+      revealKey=k;
+      document.getElementById('hRoundLb').innerHTML=SUSPENSE_HTML;
+      clearSuspense();
+      suspenseT=setTimeout(()=>{ suspenseT=null; roomRef.once('value',ss=>{const rr=ss.val();if(rr)renderClassification(rr,cap);}); },1600);
+      document.getElementById('hRoundCountdown').textContent='';
+      if(r.auto) scheduleAuto(ROUND_PAUSE,hostStartNextRound,'hRoundCountdown');
+    }
     show('s-host-roundend');
   }else if(r.status==='ended'){
-    clearTimeout(hostTimer); clearAuto(); releaseAwake(); renderLeaderboard(r,'hFinal',true); show('s-host-final');
+    clearTimeout(hostTimer); clearAuto(); releaseAwake();
+    if(revealKey!=='end'){ revealKey='end'; renderLeaderboard(r,'hFinal',true); }
+    show('s-host-final');
   }
 }
-function renderLeaderboard(r,elId,final){
-  const players=r.players||{};
-  let arr=Object.values(players);
+/* revela una tabla: el resto al instante, y el top 3 de atrás para adelante (3º→2º→1º) */
+function revealPodium(elId, rows){
+  const el=document.getElementById(elId);
+  el.innerHTML=rows.join('') || '<p class="hint" style="text-align:center">Sin jugadores</p>';
+  const n=rows.length;
+  for(let i=0;i<Math.min(3,n);i++){ const row=el.querySelector('[data-i="'+i+'"]'); if(row) row.classList.add('pod-hide'); }
+  const order=[2,1,0].filter(i=>i<n);
+  let step=0;
+  clearSuspense();
+  (function next(){
+    if(step>=order.length){ suspenseT=null; return; }
+    const idx=order[step++];
+    const row=el.querySelector('[data-i="'+idx+'"]');
+    if(row){ row.classList.remove('pod-hide'); row.classList.add('pod-in'); if(idx===0) row.classList.add('top1'); }
+    suspenseT=setTimeout(next, idx===0?700:900);
+  })();
+}
+function rowsLeaderboard(r,final){
+  let arr=Object.values(r.players||{});
   if(!final) arr=arr.filter(p=>!p.eliminated);
   arr.sort((a,b)=>(b.score||0)-(a.score||0));
-  const top=arr[0]?arr[0].score||0:0;
-  document.getElementById(elId).innerHTML=arr.slice(0,final?20:10).map((p,i)=>`
-    <div class="lb-row ${final&&i===0&&top>0?'win':''}">
-      <span class="pos">${i+1}</span><span class="av">${p.avatar||'🙂'}</span><span class="nm">${esc(p.name)}</span><span class="pt">${p.score||0}</span>
-    </div>`).join('') || '<p class="hint" style="text-align:center">Sin jugadores</p>';
+  return arr.slice(0,final?20:10).map((p,i)=>`
+    <div class="lb-row ${i===0?'win':''}" data-i="${i}">
+      <span class="pos">${i+1}</span><span class="av">${avHTML(p.avatar,30)}</span><span class="nm">${esc(p.name)}</span><span class="pt">${p.score||0}</span>
+    </div>`);
 }
-/* tabla del corte: top cap resaltado, el resto en gris (eliminados) */
-function renderClassification(r,cap){
+function renderLeaderboard(r,elId,final){ revealPodium(elId, rowsLeaderboard(r,final)); }
+/* tabla del corte: clasificados (✅) y eliminados (gris); top 3 con suspenso */
+function rowsClassification(r,cap){
   const arr=Object.values(r.players||{}).sort((a,b)=>(b.score||0)-(a.score||0));
-  document.getElementById('hRoundLb').innerHTML=arr.slice(0,Math.max(cap+5,12)).map((p,i)=>{
+  return arr.slice(0,Math.max(cap+5,12)).map((p,i)=>{
     const out=p.eliminated;
-    return `<div class="lb-row" style="${out?'opacity:.45;':'border-color:var(--good);'}">
-      <span class="pos">${i+1}</span><span class="av">${p.avatar||'🙂'}</span><span class="nm">${esc(p.name)} ${out?'· eliminado':'· ✅'}</span><span class="pt">${p.score||0}</span>
+    return `<div class="lb-row ${i===0?'win':''}" data-i="${i}" style="${out?'opacity:.45;':'border-color:var(--good);'}">
+      <span class="pos">${i+1}</span><span class="av">${avHTML(p.avatar,30)}</span><span class="nm">${esc(p.name)} ${out?'· eliminado':'· ✅'}</span><span class="pt">${p.score||0}</span>
     </div>`;
-  }).join('');
+  });
 }
+function renderClassification(r,cap){ revealPodium('hRoundLb', rowsClassification(r,cap)); }
 
 /* ---------- player ---------- */
 function joinRoom(){
@@ -627,9 +747,10 @@ function joinRoom(){
     if(r.status!=='lobby'){err.textContent='Esa partida ya empezó.';err.style.display='block';return;}
     pin=p; role='player'; playerName=nm; roomRef=db.ref('rooms/'+pin);
     const pref=roomRef.child('players').push();
-    playerId=pref.key; pref.set({name:nm,score:0,eliminated:false,avatar:selectedAvatar});
-    pref.onDisconnect().remove();
-    document.getElementById('pName').textContent=selectedAvatar+' '+nm;
+    playerId=pref.key; pref.set({name:nm,score:0,eliminated:false,avatar:selectedAvatar,online:true});
+    roomRef.child('players/'+playerId+'/online').onDisconnect().set(false);
+    saveSession();
+    document.getElementById('pName').innerHTML=avHTML(selectedAvatar,30)+' '+esc(nm);
     listenRoomPlayer(); show('s-player-lobby');
   });
 }
@@ -641,11 +762,11 @@ function renderPlayerByStatus(r){
   if(r.status==='question'){
     if(me.eliminated){ showSpectator(r,me); return; }
     const key=r.round+'-'+r.questionIndex;
-    if(lastKey!==key){ myAnswered=false; myResult=null; lastKey=key; }
+    if(lastKey!==key){ myAnswered=false; myResult=null; lastKey=key; playerRevealKey=null; clearSuspense(); }
     if(myAnswered){ show('s-player-wait'); return; }
     const q=r.rounds[r.round][r.questionIndex]; const c=CATS[q.cat];
     document.getElementById('pCat').textContent=c.name; document.getElementById('pCat').style.background=c.color;
-    document.getElementById('pQNum').textContent=`${ROUND_NAMES[r.round]} · ${r.questionIndex+1}/${r.qPerRound}`;
+    document.getElementById('pQNum').textContent=`${ROUND_NAMES[r.round]} · ${r.questionIndex+1}/${r.qPerRound}${q.d?' · '+DIFF_LABEL[q.d]:''}`;
     document.getElementById('pQText').textContent=q.q;
     document.getElementById('pAnswers').innerHTML=q.options.map((o,i)=>`<button class="ans c${i+1}" onclick="playerAnswer(${i})"><span class="shape">${SHAPES[i]}</span><span>${esc(o)}</span></button>`).join('');
     startRing('p',r.currentStartedAt,r.timerSecs);
@@ -674,17 +795,30 @@ function showRoundEndPlayer(r,me){
   show('s-player-wait');
 }
 function showPlayerRank(r,me){
-  const arr=Object.entries(r.players||{}).map(([id,p])=>({id,...p})).filter(p=>!p.eliminated)
-              .sort((a,b)=>(b.score||0)-(a.score||0));
-  const pos=arr.findIndex(p=>p.id===playerId)+1;
-  const res=myResult;
-  let head='';
-  if(res){ head=(res.correct?`✅ +${res.points}`:'❌ +0')+' · '; }
-  document.getElementById('pRankMe').textContent=`${head}vas ${pos||'-'}º`;
-  document.getElementById('pRankLb').innerHTML=arr.slice(0,10).map((p,i)=>`
-    <div class="lb-row ${p.id===playerId?'me':''}">
-      <span class="pos">${i+1}</span><span class="av">${p.avatar||'🙂'}</span><span class="nm">${esc(p.name)}</span><span class="pt">${p.score||0}</span>
-    </div>`).join('');
+  const k='prank-'+r.round+'-'+r.questionIndex;
+  if(playerRevealKey===k) return;
+  playerRevealKey=k;
+  clearSuspense();
+  document.getElementById('pRankKick').textContent='Ranking provisorio';
+  document.getElementById('pRankMe').innerHTML='<span class="drum">🥁</span>';
+  document.getElementById('pRankLb').innerHTML='<div class="suspense"><div class="txt">Calculando…</div></div>';
+  suspenseT=setTimeout(()=>{
+    suspenseT=null;
+    roomRef.once('value',ss=>{
+      const rr=ss.val(); if(!rr) return;
+      const arr=Object.entries(rr.players||{}).map(([id,p])=>({id,...p})).filter(p=>!p.eliminated)
+                  .sort((a,b)=>(b.score||0)-(a.score||0));
+      const pos=arr.findIndex(p=>p.id===playerId)+1;
+      const res=myResult;
+      const head=res?((res.correct?`✅ +${res.points}`:'❌ +0')+' · '):'';
+      document.getElementById('pRankMe').innerHTML=`${head}vas <span class="bignum">${pos||'-'}º</span>`;
+      const rows=arr.slice(0,10).map((p,i)=>`
+        <div class="lb-row ${i===0?'win':''} ${p.id===playerId?'me':''}" data-i="${i}">
+          <span class="pos">${i+1}</span><span class="av">${avHTML(p.avatar,30)}</span><span class="nm">${esc(p.name)}</span><span class="pt">${p.score||0}</span>
+        </div>`);
+      revealPodium('pRankLb', rows);
+    });
+  },1200);
 }
 function playerAnswer(choice){
   if(myAnswered)return; myAnswered=true;
@@ -735,13 +869,32 @@ function stopRing(){ if(ringTimer){clearInterval(ringTimer);ringTimer=null;} }
 
 /* ---------- utils ---------- */
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function cleanup(){ if(roomRef){roomRef.off();} clearTimeout(hostTimer); clearAuto(); releaseAwake(); stopRing(); pin=null;roomRef=null;role=null;playerId=null;myAnswered=false;lastStatus=null;lastKey=null; }
-function resetAll(){ if(role==='player'&&roomRef&&playerId){roomRef.child('players/'+playerId).remove();} if(role==='host'&&roomRef){roomRef.remove();} cleanup(); show('s-home'); }
+function cleanup(){ if(roomRef){roomRef.off();} clearTimeout(hostTimer); clearAuto(); clearSuspense(); releaseAwake(); stopRing(); pin=null;roomRef=null;role=null;playerId=null;myAnswered=false;lastStatus=null;lastKey=null;revealKey=null;playerRevealKey=null; }
+function resetAll(){ clearSession(); if(role==='player'&&roomRef&&playerId){roomRef.child('players/'+playerId).remove();} if(role==='host'&&roomRef){roomRef.remove();} cleanup(); show('s-home'); }
 
-/* deep link join via QR (#join=PIN) */
+/* reconexión: si cerraste o se bloqueó el teléfono, volvés con tus puntos */
+function tryRestore(cb){
+  let sess=null; try{ sess=JSON.parse(localStorage.getItem('argentrivia_session')||'null'); }catch(e){}
+  if(!sess||!sess.pin||!sess.playerId||!fbReady){ cb(false); return; }
+  db.ref('rooms/'+sess.pin+'/players/'+sess.playerId).once('value',snap=>{
+    if(!snap.exists()){ clearSession(); cb(false); return; }
+    pin=sess.pin; role='player'; playerId=sess.playerId; playerName=sess.name; selectedAvatar=sess.avatar||selectedAvatar;
+    roomRef=db.ref('rooms/'+pin);
+    roomRef.child('players/'+playerId+'/online').set(true);
+    roomRef.child('players/'+playerId+'/online').onDisconnect().set(false);
+    document.getElementById('pName').innerHTML=avHTML(selectedAvatar,30)+' '+esc(playerName||'');
+    listenRoomPlayer();
+    cb(true);
+  });
+}
+
+/* boot: primero intenta reconectar; si no, deep link de QR (#join=PIN) */
 (function(){
-  const m=location.hash.match(/join=([A-Za-z0-9]{4})/);
-  if(m){ document.getElementById('pinInput').value=m[1].toUpperCase(); renderAvatars(); show('s-join'); setTimeout(()=>document.getElementById('nameInput').focus(),200); }
+  tryRestore(function(restored){
+    if(restored) return;
+    const m=location.hash.match(/join=([A-Za-z0-9]{4})/);
+    if(m){ document.getElementById('pinInput').value=m[1].toUpperCase(); renderAvatars(); show('s-join'); setTimeout(()=>document.getElementById('nameInput').focus(),200); }
+  });
 })();
 </script>
 </body>
